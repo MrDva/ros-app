@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_navigation"
+    app:startDestination="@id/connectionConfigFragment">
+    <fragment
+        android:id="@+id/connectionConfigFragment"
+        android:name="edu.czb.ros_app.ui.fragments.ConnectionConfigFragment"
+        tools:layout="@layout/fragment_connection_config"/>
+    <action
+        android:id="@+id/action_to_connectionConfig"
+        app:destination="@id/connectionConfigFragment"
+        app:popUpTo="@id/main_navigation"
+        app:popUpToInclusive="true"/>
+
+    <fragment
+        android:id="@+id/controllerFragment"
+        android:name="edu.czb.ros_app.ui.fragments.ControllerFragment"
+        tools:layout="@layout/fragment_controller"/>
+    <action
+        android:id="@+id/action_to_controller"
+        app:destination="@+id/controllerFragment"
+        app:popUpTo="@id/main_navigation"
+        app:popUpToInclusive="true"/>
+
+    <fragment
+        android:id="@+id/mapFragment"
+        android:name="edu.czb.ros_app.ui.fragments.MapFragment"
+        tools:layout="@layout/fragment_map"/>
+    <action
+        android:id="@+id/action_to_map"
+        app:destination="@+id/mapFragment"
+        app:popUpTo="@id/main_navigation"
+        app:popUpToInclusive="true"/>
+
+    <fragment
+        android:id="@+id/infoFragment"
+        android:name="edu.czb.ros_app.ui.fragments.InfoFragment"
+        tools:layout="@layout/fragment_info"/>
+    <action
+        android:id="@+id/action_to_info"
+        app:destination="@+id/infoFragment"
+        app:popUpTo="@id/main_navigation"
+        app:popUpToInclusive="true"/>
+
+
+</navigation>

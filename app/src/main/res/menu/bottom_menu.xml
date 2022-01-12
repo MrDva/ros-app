@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/connectionConfigFragment"
+        android:title="连接控制"
+        android:icon="@drawable/ic_baseline_cast_connected_24"
+        app:iconTint="@color/whiteMedium"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/controllerFragment"
+        android:title="控制中心"
+        android:icon="@drawable/ic_baseline_videogame_asset_24"
+        app:iconTint="@color/battery2"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/mapFragment"
+        android:icon="@drawable/ic_baseline_location_on_24"
+        android:title="地图"
+        app:iconTint="@color/black"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/infoFragment"
+        android:title="设备信息"
+        android:icon="@drawable/ic_baseline_wysiwyg_24"
+        app:iconTint="@color/black"
+        app:showAsAction="always"/>
+
+</menu>
