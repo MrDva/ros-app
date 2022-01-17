@@ -17,7 +17,7 @@
         android:padding="16dp">
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/master_TextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Master node URI"
@@ -28,7 +28,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/input_layout2"
+            android:id="@+id/master_url_input_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -37,7 +37,7 @@
             app:boxBackgroundMode="outline"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView">
+            app:layout_constraintTop_toBottomOf="@+id/master_TextView">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/master_ip_editText"
@@ -60,7 +60,7 @@
             app:boxBackgroundMode="outline"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/input_layout2">
+            app:layout_constraintTop_toBottomOf="@+id/master_url_input_layout">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/master_port_editText"
@@ -73,7 +73,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
-            android:id="@+id/WifiText"
+            android:id="@+id/wifi_testView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
@@ -85,7 +85,7 @@
             app:layout_constraintTop_toBottomOf="@+id/master_port_inputLayout" />
 
         <TextView
-            android:id="@+id/wifiText"
+            android:id="@+id/statesText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
@@ -94,7 +94,7 @@
             android:textColor="@color/colorAccent"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ipAddessLayout" />
+            app:layout_constraintTop_toBottomOf="@+id/ipAddressLayout" />
 
         <ImageView
             android:id="@+id/wifiImageView"
@@ -119,7 +119,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toEndOf="@+id/wifiImageView"
-            app:layout_constraintTop_toBottomOf="@id/WifiText">
+            app:layout_constraintTop_toBottomOf="@id/wifi_testView">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/NetworkSSIDText"
@@ -136,13 +136,13 @@
             android:id="@+id/ipImageView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="@+id/ipAddessLayout"
+            app:layout_constraintBottom_toBottomOf="@+id/ipAddressLayout"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/ipAddessLayout"
+            app:layout_constraintTop_toTopOf="@+id/ipAddressLayout"
             app:srcCompat="@drawable/ic_place_white_24dp" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/ipAddessLayout"
+            android:id="@+id/ipAddressLayout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -154,7 +154,7 @@
             app:layout_constraintTop_toBottomOf="@+id/network_SSID_choice_text">
 
             <AutoCompleteTextView
-                android:id="@+id/ipAddessTextView"
+                android:id="@+id/ipAddressTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="none"
@@ -205,7 +205,7 @@
             android:text="@string/disconnected"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             app:layout_constraintStart_toEndOf="@+id/connectedImage"
-            app:layout_constraintTop_toBottomOf="@+id/wifiText" />
+            app:layout_constraintTop_toBottomOf="@+id/ipAddressLayout" />
 
         <ImageView
             android:id="@+id/connectedImage"
@@ -213,7 +213,7 @@
             android:layout_height="24dp"
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="@+id/statusText"
-            app:layout_constraintStart_toStartOf="@+id/wifiText"
+            app:layout_constraintStart_toStartOf="@+id/wifi_testView"
             app:layout_constraintTop_toTopOf="@+id/statusText"
             app:srcCompat="@drawable/ic_connected"
             app:tint="@color/ok_green" />
@@ -223,7 +223,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             app:layout_constraintBottom_toBottomOf="@+id/statusText"
-            app:layout_constraintStart_toStartOf="@+id/wifiText"
+            app:layout_constraintStart_toStartOf="@+id/wifi_testView"
             app:layout_constraintTop_toTopOf="@+id/statusText"
             app:srcCompat="@drawable/ic_connected"
             app:tint="@color/delete_red" />
