@@ -11,12 +11,18 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
 
+import java.util.HashMap;
+import java.util.List;
+
 import edu.czb.ros_app.model.db.DataStorage;
 import edu.czb.ros_app.model.entities.MasterEntity;
+import edu.czb.ros_app.model.entities.widgets.BaseEntity;
 import edu.czb.ros_app.model.enums.ConnectionStateType;
 import edu.czb.ros_app.model.rosRepositories.ConfigRepository;
 import edu.czb.ros_app.model.rosRepositories.ConfigRepositoryImpl;
 import edu.czb.ros_app.model.rosRepositories.RosRepository;
+import edu.czb.ros_app.model.rosRepositories.message.RosData;
+import edu.czb.ros_app.model.rosRepositories.message.Topic;
 
 /**
  * @ProjectName: ros-app
@@ -34,14 +40,16 @@ public class RosDomain {
     private RosRepository rosRepository;
     private MutableLiveData<Long> id=new MutableLiveData<>(1L);
     private ConfigRepository configRepository;
-
+    /*private final LiveData<HashMap<String,BaseEntity>> currentWidgets;*/
     private static RosDomain mInstance;
 
     public RosDomain(Application application){
 
         this.rosRepository=new RosRepository(application);
         this.configRepository = ConfigRepositoryImpl.getInstance(application);
-
+        /*currentWidgets = Transformations.switchMap(id,
+                configRepository::getWidgets);*/
+        /*currentWidgets.observeForever(rosRepository::updateWidgets);*/
         master = Transformations.switchMap(id,configRepository::getMaster);
         master.observeForever(rosRepository::updateMaster);
     }
@@ -70,8 +78,26 @@ public class RosDomain {
         return rosRepository.getRosConnected();
     }
 
+    public List<Topic> getTopicList() { return rosRepository.getTopicList(); }
+
+    public MutableLiveData<RosData> getRosData(){
+        return rosRepository.getRosData();
+    }
+
     public void connectToMaster(){
         rosRepository.connectToMaster();
+    }
+
+    public void disconnectFromMaster(){
+        rosRepository.disconnectFromMaster();
+    }
+
+    public void addAllTopic(){
+        rosRepository.addAllTopic();
+    }
+
+    public void setMasterDeviceIp(String deviceIp){
+        rosRepository.setMasterDeviceIp(deviceIp);
     }
 
 }

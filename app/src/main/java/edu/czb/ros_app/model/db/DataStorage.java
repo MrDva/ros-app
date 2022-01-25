@@ -11,8 +11,11 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteOpenHelper;
 
+import java.util.List;
+
 import edu.czb.ros_app.R;
 import edu.czb.ros_app.model.entities.MasterEntity;
+import edu.czb.ros_app.model.entities.widgets.BaseEntity;
 import edu.czb.ros_app.utils.Constants;
 import edu.czb.ros_app.utils.LambdaTask;
 
@@ -62,6 +65,40 @@ public abstract class DataStorage extends RoomDatabase {
     public LiveData<MasterEntity> getMaster(long id) {
         return masterDao().getMaster(id);
     }
+
+
+    // Widget methods ------------------------------------------------------------------------------
+
+    /*public void addWidget(BaseEntity widget) {
+        new LambdaTask(() ->
+                widgetDao().insert(widget))
+                .execute();
+    }
+
+    public void updateWidget(BaseEntity widget) {
+        new LambdaTask(() ->
+                widgetDao().update(widget))
+                .execute();
+    }
+
+    public void deleteWidget(BaseEntity widget) {
+        new LambdaTask(() ->
+                widgetDao().delete(widget))
+                .execute();
+    }
+
+    public LiveData<BaseEntity> getWidget(long configId, long widgetId) {
+        return widgetDao().getWidget(configId, widgetId);
+    }*/
+
+/*
+    public LiveData<List<BaseEntity>> getWidgets(long configId) {
+        return widgetDao().getWidgets(configId);
+    }
+
+    public boolean widgetNameExists(long configId, String name) {
+        return widgetDao().exists(configId, name);
+    }*/
 
     /*@NonNull
     @Override

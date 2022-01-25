@@ -8,6 +8,9 @@
     android:background="@color/white">
 
 
+    <edu.czb.ros_app.widgets.joystick.JoystickView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
     <!--<androidx.drawerlayout.widget.DrawerLayout
         android:id="@+id/viz_options_drawer"
         android:layout_width="match_parent"

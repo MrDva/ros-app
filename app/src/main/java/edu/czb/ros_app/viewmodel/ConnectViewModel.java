@@ -90,4 +90,12 @@ public class ConnectViewModel extends AndroidViewModel {
 
         networkSSIDLiveData.postValue(ssid);
     }
+
+    public void setMasterDeviceIp(String deviceIp){
+        rosDomain.setMasterDeviceIp(deviceIp);
+    }
+
+    public void disconnectFromMaster(){
+        rosDomain.disconnectFromMaster();
+    }
 }

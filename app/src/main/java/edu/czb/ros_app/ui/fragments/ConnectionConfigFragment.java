@@ -94,6 +94,7 @@ public class ConnectionConfigFragment extends Fragment implements TextView.OnEdi
         ipAddressField.setOnItemClickListener(((parent, view, position, id) -> {
             ipAddressField.clearFocus();
         }));
+        getViewLifecycleOwner();
 
         //view model connection
         connectViewModel.getCurrentMaster().observe(getViewLifecycleOwner(),master->{
@@ -118,7 +119,13 @@ public class ConnectionConfigFragment extends Fragment implements TextView.OnEdi
         //user input
         binding.connectButton.setOnClickListener(v->{
             updateMasterDetails();
+            connectViewModel.setMasterDeviceIp(ipAddressField.getText().toString());
             connectToMaster();
+        });
+
+        binding.disconnectButton.setOnClickListener(v->{
+            connectViewModel.getRosDomain().getTopicList();
+            connectViewModel.disconnectFromMaster();
         });
 
     }

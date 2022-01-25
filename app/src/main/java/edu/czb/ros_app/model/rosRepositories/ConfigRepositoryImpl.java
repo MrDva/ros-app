@@ -6,8 +6,11 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 
+import java.util.List;
+
 import edu.czb.ros_app.model.db.DataStorage;
 import edu.czb.ros_app.model.entities.MasterEntity;
+import edu.czb.ros_app.model.entities.widgets.BaseEntity;
 
 /**
  * @ProjectName: ros-app
@@ -51,6 +54,12 @@ public class ConfigRepositoryImpl implements ConfigRepository{
         }
         return master;
 
+    }
+
+    @Override
+    public LiveData<List<BaseEntity>> getWidgets(long configId) {
+        /*return mDataStorage.get(id);*/
+        return null;
     }
 
 
