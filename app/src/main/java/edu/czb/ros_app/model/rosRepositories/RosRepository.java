@@ -32,16 +32,25 @@ import edu.czb.ros_app.model.entities.widgets.BaseEntity;
 import edu.czb.ros_app.model.enums.ConnectionStateType;
 import edu.czb.ros_app.model.rosRepositories.connection.ConnectionCheckTask;
 import edu.czb.ros_app.model.rosRepositories.connection.ConnectionListener;
+import edu.czb.ros_app.model.rosRepositories.message.BaseData;
 import edu.czb.ros_app.model.rosRepositories.message.RosData;
 
 import edu.czb.ros_app.model.rosRepositories.message.Topic;
 import edu.czb.ros_app.model.rosRepositories.node.AbstractNode;
 import edu.czb.ros_app.model.rosRepositories.node.NodeMainExecutorService;
 import edu.czb.ros_app.model.rosRepositories.node.NodeMainExecutorServiceListener;
+import edu.czb.ros_app.model.rosRepositories.node.PublisherNode;
 import edu.czb.ros_app.model.rosRepositories.node.SubscriberNode;
 import edu.czb.ros_app.widgets.battey.BatteryEntity;
 import edu.czb.ros_app.widgets.battey.BatteryView;
+import edu.czb.ros_app.widgets.imu.ImuEntity;
+import edu.czb.ros_app.widgets.imu.RpyEntity;
+import edu.czb.ros_app.widgets.joystick.JoystickEntity;
+import edu.czb.ros_app.widgets.map.MapEntity;
+import edu.czb.ros_app.widgets.map.MapPathEntity;
+import edu.czb.ros_app.widgets.temperature.TemperatureEntity;
 import geometry_msgs.TransformStamped;
+import sensor_msgs.Temperature;
 import tf2_msgs.TFMessage;
 
 /**
@@ -61,6 +70,7 @@ public class RosRepository implements MessageListener<RosData> {
     private final MutableLiveData<ConnectionStateType> rosConnected;
     private NodeMainExecutorService nodeMainExecutorService;
     private final MutableLiveData<RosData> receivedData;
+    private final MutableLiveData<RosData> receivedMapData;
     private final HashMap<Topic, AbstractNode> currentNodes;
     private NodeConfiguration nodeConfiguration;
     //private FrameTransformTree frameTransformTree;
@@ -69,6 +79,7 @@ public class RosRepository implements MessageListener<RosData> {
         this.currentNodes = new HashMap<>();
         this.rosConnected = new MutableLiveData<>(ConnectionStateType.DISCONNECTED);
         this.receivedData = new MutableLiveData<>();
+        this.receivedMapData=new MutableLiveData<>();
        // this.frameTransformTree = TransformProvider.getInstance().getTree();
         this.initStaticNodes();
     }
@@ -84,7 +95,22 @@ public class RosRepository implements MessageListener<RosData> {
                 Log.i(TAG,transform.toString());
             }
         }
+        if(message.getTopic().name.contains("navSatFix")){
+            this.receivedMapData.postValue(message);
+        }
         this.receivedData.postValue(message);
+    }
+
+    /**
+     * Find the associated node and inform it about the changed data.
+     * @param data Widget data that has changed
+     */
+    public void publishData(BaseData data) {
+        AbstractNode node = currentNodes.get(data.getTopic());
+        //Log.i(TAG,"topic:"+data.getTopic().name);
+        if(node instanceof PublisherNode) {
+            ((PublisherNode)node).setData(data);
+        }
     }
 
     public void updateMaster(MasterEntity master){
@@ -104,6 +130,9 @@ public class RosRepository implements MessageListener<RosData> {
 
     public MutableLiveData<RosData> getRosData(){
         return receivedData;
+    }
+    public MutableLiveData<RosData> getReceivedMapData(){
+        return receivedMapData;
     }
 
     public void connectToMaster(){
@@ -324,6 +353,36 @@ public class RosRepository implements MessageListener<RosData> {
         SubscriberNode node=new SubscriberNode(this);
         node.setTopic(batteryEntity.getTopic());
         currentNodes.put(batteryEntity.getTopic(),node);
+
+        MapEntity mapEntity=new MapEntity();
+        node=new SubscriberNode(this);
+        node.setTopic(mapEntity.getTopic());
+        currentNodes.put(mapEntity.getTopic(),node);
+
+        TemperatureEntity temperatureEntity=new TemperatureEntity();
+        node=new SubscriberNode(this);
+        node.setTopic(temperatureEntity.getTopic());
+        currentNodes.put(temperatureEntity.getTopic(),node);
+
+        ImuEntity imuEntity=new ImuEntity();
+        node=new SubscriberNode(this);
+        node.setTopic(imuEntity.getTopic());
+        currentNodes.put(imuEntity.getTopic(),node);
+
+        RpyEntity rpyEntity=new RpyEntity();
+        node=new SubscriberNode(this);
+        node.setTopic(rpyEntity.getTopic());
+        currentNodes.put(rpyEntity.getTopic(),node);
+
+        JoystickEntity  joystickEntity=new JoystickEntity();
+        PublisherNode publisherNode=new PublisherNode();
+        publisherNode.setTopic(joystickEntity.getTopic());
+        currentNodes.put(joystickEntity.getTopic(),publisherNode);
+
+        MapPathEntity mapPathEntity=new MapPathEntity();
+        publisherNode=new PublisherNode();
+        publisherNode.setTopic(mapPathEntity.getTopic());
+        currentNodes.put(mapPathEntity.getTopic(),publisherNode);
 
     }
 

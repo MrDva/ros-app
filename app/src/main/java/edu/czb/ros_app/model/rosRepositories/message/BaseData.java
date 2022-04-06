@@ -14,7 +14,7 @@ import org.ros.node.topic.Publisher;
  */
 public class BaseData {
     protected Topic topic;
-
+    protected Message message;
 
     public void setTopic(Topic topic) {
         this.topic = topic;
@@ -24,7 +24,15 @@ public class BaseData {
         return this.topic;
     }
 
+    public Message getMessage() {
+        return message;
+    }
+
+    public void setMessage(Message message) {
+        this.message = message;
+    }
+
     public Message toRosMessage(Publisher<Message> publisher){
-        return null;
+        return publisher.newMessage();
     }
 }

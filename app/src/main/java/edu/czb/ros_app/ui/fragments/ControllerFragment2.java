@@ -3,9 +3,7 @@ package edu.czb.ros_app.ui.fragments;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -19,20 +17,24 @@ import androidx.navigation.Navigation;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.Arrays;
-
 import edu.czb.ros_app.R;
 import edu.czb.ros_app.viewmodel.ControllerViewModel;
-import edu.czb.ros_app.widgets.joystick.JoystickData;
 import edu.czb.ros_app.widgets.joystick.JoystickView;
+import edu.czb.ros_app.widgets.joystick.JoystickView2;
 
-public class ControllerFragment extends Fragment  {
+/**
+ * @ProjectName: ros-app
+ * @Package: edu.czb.ros_app.ui.fragments
+ * @ClassName: ControllerFragment2
+ * @Description:
+ * @Author: 陈泽彬
+ * @CreateDate: 2022/4/2 21:05
+ * @Version: 1.0
+ */
+public class ControllerFragment2 extends Fragment {
     private static final String TAG = ControllerFragment.class.getSimpleName();
     private JoystickView joystickView;
-    private Button AButton;
-    private Button BButton;
-    private Button XButton;
-    private Button YButton;
+    private JoystickView2 joystickView2;
     private ControllerViewModel controllerViewModel;
     private FloatingActionButton floatingActionButton;
     private NavController controller;
@@ -43,7 +45,7 @@ public class ControllerFragment extends Fragment  {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_controller, container, false);
+        return inflater.inflate(R.layout.fragment_controller2, container, false);
     }
 
     @Override
@@ -58,12 +60,9 @@ public class ControllerFragment extends Fragment  {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         controllerViewModel=new ViewModelProvider(requireActivity()).get(ControllerViewModel.class);
-        joystickView=getView().findViewById(R.id.joystick);
-        AButton=getView().findViewById(R.id.button_A);
-        BButton=getView().findViewById(R.id.button_B);
-        XButton=getView().findViewById(R.id.button_X);
-        YButton=getView().findViewById(R.id.button_Y);
-        floatingActionButton=getView().findViewById(R.id.switch_left);
+        joystickView=getView().findViewById(R.id.joystick2_1);
+        joystickView2=getView().findViewById(R.id.joystick2_2);
+        floatingActionButton=getView().findViewById(R.id.switch_right);
         floatingActionButton.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#8881D4FA")));
         /*joystickView.getAxesLiveData().observe(getViewLifecycleOwner(),axes->{
             //Log.i(TAG,"axes:["+ Arrays.toString(axes)+"]");
@@ -77,51 +76,16 @@ public class ControllerFragment extends Fragment  {
             JoystickData joystickData=new JoystickData(new float[6],button);
             controllerViewModel.getRosDomain().publicData(joystickData);
         });*/
+        floatingActionButton.setOnClickListener(l->{
+            controller.navigate(R.id.action_to_controller);
+        });
         joystickView.getJoystickLiveData().observe(getViewLifecycleOwner(),joystickData -> {
             controllerViewModel.getRosDomain().publicData(joystickData);
-            int sum=0;
-            for (int i : joystickData.button) {
-                sum+=i;
-            }
-            if(sum>0){
-                joystickView.updateJoyStickLiveDate(new float[6],new int[6]);
-            }
+        });
+        joystickView2.getJoystickLiveData().observe(getViewLifecycleOwner(),joystickData -> {
+            controllerViewModel.getRosDomain().publicData(joystickData);
         });
 
-        floatingActionButton.setOnClickListener(l->{
-            controller.navigate(R.id.action_to_controller2);
-        });
-
-        AButton.setOnClickListener(l->{
-            float[] axes=new float[6];
-            int[] button=new int[6];
-            button[1]=1;
-            joystickView.updateJoyStickLiveDate(axes,button);
-
-
-        });
-        BButton.setOnClickListener(l->{
-            float[] axes=new float[6];
-            int[] button=new int[6];
-            button[2]=1;
-            joystickView.updateJoyStickLiveDate(axes,button);
-
-
-        });
-        XButton.setOnClickListener(l->{
-            float[] axes=new float[6];
-            int[] button=new int[6];
-            button[0]=1;
-            joystickView.updateJoyStickLiveDate(axes,button);
-
-        });
-        YButton.setOnClickListener(l->{
-            float[] axes=new float[6];
-            int[] button=new int[6];
-            button[4]=1;
-            joystickView.updateJoyStickLiveDate(axes,button);
-
-        });
 
     }
     @Override

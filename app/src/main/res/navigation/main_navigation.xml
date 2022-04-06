@@ -25,6 +25,17 @@
         app:popUpToInclusive="true"/>
 
     <fragment
+        android:id="@+id/controllerFragment2"
+        android:name="edu.czb.ros_app.ui.fragments.ControllerFragment2"
+        tools:layout="@layout/fragment_controller2"/>
+    <action
+        android:id="@+id/action_to_controller2"
+        app:destination="@+id/controllerFragment2"
+        app:popUpTo="@id/main_navigation"
+        app:popUpToInclusive="true"/>
+
+
+    <fragment
         android:id="@+id/mapFragment"
         android:name="edu.czb.ros_app.ui.fragments.MapFragment"
         tools:layout="@layout/fragment_map"/>

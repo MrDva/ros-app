@@ -5,7 +5,7 @@
         android:id="@+id/connectionConfigFragment"
         android:title="连接控制"
         android:icon="@drawable/ic_baseline_cast_connected_24"
-        app:iconTint="@color/whiteMedium"
+        app:iconTint="@color/white"
         app:showAsAction="always"/>
     <item
         android:id="@+id/controllerFragment"
@@ -17,13 +17,13 @@
         android:id="@+id/mapFragment"
         android:icon="@drawable/ic_baseline_location_on_24"
         android:title="地图"
-        app:iconTint="@color/black"
+        app:iconTint="@color/white"
         app:showAsAction="always"/>
     <item
         android:id="@+id/infoFragment"
         android:title="设备信息"
         android:icon="@drawable/ic_baseline_wysiwyg_24"
-        app:iconTint="@color/black"
+        app:iconTint="@color/white"
         app:showAsAction="always"/>
 
 </menu>

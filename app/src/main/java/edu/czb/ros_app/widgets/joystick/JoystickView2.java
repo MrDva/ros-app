@@ -6,17 +6,13 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewDebug;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
-
-import org.ros.internal.message.Message;
 
 import edu.czb.ros_app.R;
 import edu.czb.ros_app.model.rosRepositories.message.Topic;
@@ -25,13 +21,13 @@ import sensor_msgs.Joy;
 /**
  * @ProjectName: ros-app
  * @Package: edu.czb.ros_app.widgets.joystick
- * @ClassName: JoystickView
+ * @ClassName: JoystickView2
  * @Description:
  * @Author: 陈泽彬
- * @CreateDate: 2022/1/21 12:25
+ * @CreateDate: 2022/4/2 20:52
  * @Version: 1.0
  */
-public class JoystickView extends SurfaceView implements SurfaceHolder.Callback, View.OnTouchListener {
+public class JoystickView2 extends SurfaceView implements SurfaceHolder.Callback, View.OnTouchListener {
     private static final String TAG=JoystickView.class.getSimpleName();
     private float centerX;
     private float centerY;
@@ -42,7 +38,7 @@ public class JoystickView extends SurfaceView implements SurfaceHolder.Callback,
     private MutableLiveData<int[]> buttonLiveData;
     private MutableLiveData<JoystickData> joystickLiveData;
     private boolean preState=true;
-    public JoystickView(Context context) {
+    public JoystickView2(Context context) {
         super(context);
         getHolder().addCallback(this);
         setOnTouchListener(this);
@@ -55,11 +51,11 @@ public class JoystickView extends SurfaceView implements SurfaceHolder.Callback,
         joystickLiveData.setValue(joystickData);
     }
 
-   /* @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+    /* @Override
+     protected void onLayout(boolean changed, int l, int t, int r, int b) {
 
-    }*/
-    public JoystickView(Context context, AttributeSet attrs) {
+     }*/
+    public JoystickView2(Context context, AttributeSet attrs) {
         super(context, attrs);
         getHolder().addCallback(this);
         setOnTouchListener(this);
@@ -160,8 +156,8 @@ public class JoystickView extends SurfaceView implements SurfaceHolder.Callback,
                     drawJoystick(e.getX(),e.getY());
                     float[] axes=new float[6];
                     int[] button=new int[6];
-                    axes[4]=(e.getX()-centerX)/baseRadius;
-                    axes[3]=(e.getY()-centerY)/baseRadius;
+                    axes[0]=(e.getX()-centerX)/baseRadius;
+                    axes[1]=(e.getY()-centerY)/baseRadius;
                     updateJoyStickLiveDate(axes,button);
                 }else{
                     float ratio=baseRadius/displacement;
@@ -170,8 +166,8 @@ public class JoystickView extends SurfaceView implements SurfaceHolder.Callback,
                     drawJoystick(constrainedX,constrainedY);
                     float[] axes=new float[6];
                     int[] button=new int[6];
-                    axes[4]=(constrainedX-centerX)/baseRadius;
-                    axes[3]=(constrainedY-centerY)/baseRadius;
+                    axes[0]=(constrainedX-centerX)/baseRadius;
+                    axes[1]=(constrainedY-centerY)/baseRadius;
                     /*button[0]=1;
                     button[1]=2;
                     button[2]=2;*/

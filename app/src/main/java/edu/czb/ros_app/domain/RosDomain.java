@@ -21,6 +21,7 @@ import edu.czb.ros_app.model.enums.ConnectionStateType;
 import edu.czb.ros_app.model.rosRepositories.ConfigRepository;
 import edu.czb.ros_app.model.rosRepositories.ConfigRepositoryImpl;
 import edu.czb.ros_app.model.rosRepositories.RosRepository;
+import edu.czb.ros_app.model.rosRepositories.message.BaseData;
 import edu.czb.ros_app.model.rosRepositories.message.RosData;
 import edu.czb.ros_app.model.rosRepositories.message.Topic;
 
@@ -84,6 +85,10 @@ public class RosDomain {
         return rosRepository.getRosData();
     }
 
+    public MutableLiveData<RosData> getMapRosData(){
+        return rosRepository.getRosData();
+    }
+
     public void connectToMaster(){
         rosRepository.connectToMaster();
     }
@@ -98,6 +103,10 @@ public class RosDomain {
 
     public void setMasterDeviceIp(String deviceIp){
         rosRepository.setMasterDeviceIp(deviceIp);
+    }
+
+    public void publicData(BaseData baseData){
+        rosRepository.publishData(baseData);
     }
 
 }

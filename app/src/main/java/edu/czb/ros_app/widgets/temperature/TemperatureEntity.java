@@ -19,4 +19,5 @@ public class TemperatureEntity extends BaseEntity {
     public TemperatureEntity() {
         this.topic = new Topic("temperature", Temperature._TYPE);
     }
+
 }

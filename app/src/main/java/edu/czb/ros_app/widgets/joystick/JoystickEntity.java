@@ -3,6 +3,7 @@ package edu.czb.ros_app.widgets.joystick;
 import edu.czb.ros_app.model.entities.widgets.BaseEntity;
 import edu.czb.ros_app.model.rosRepositories.message.Topic;
 import geometry_msgs.Twist;
+import sensor_msgs.Joy;
 
 /**
  * @ProjectName: ros-app
@@ -24,7 +25,7 @@ public class JoystickEntity extends BaseEntity {
     public boolean immediatePublish = false;
 
     public JoystickEntity() {
-        this.topic = new Topic("cmd_vel", Twist._TYPE);
+        this.topic = new Topic("joy", Joy._TYPE);
         this.immediatePublish = false;
         this.publishRate = 20f;
         this.xAxisMapping = "Angular/Z";

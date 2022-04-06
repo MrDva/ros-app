@@ -13,12 +13,12 @@ import edu.czb.ros_app.model.rosRepositories.message.BaseData;
  */
 public class JoystickData extends BaseData {
     public static final String TAG = JoystickData.class.getSimpleName();
-    public float x;
-    public float y;
+    public float axes[];
+    public int button[];
 
 
-    public JoystickData(float x, float y) {
-        this.x = x;
-        this.y = y;
+    public JoystickData(float[] axes, int[] button) {
+        this.axes = axes;
+        this.button = button;
     }
 }

@@ -16,14 +16,22 @@ import edu.czb.ros_app.R;
 import edu.czb.ros_app.databinding.FragmentInfoBinding;
 import edu.czb.ros_app.viewmodel.InfoViewModel;
 import edu.czb.ros_app.widgets.battey.BatteryView;
+import edu.czb.ros_app.widgets.imu.ImuAccView;
+import edu.czb.ros_app.widgets.imu.ImuAngView;
+import edu.czb.ros_app.widgets.imu.RpyView;
+import edu.czb.ros_app.widgets.map.MapInfoVIew;
+import edu.czb.ros_app.widgets.temperature.TemperatureView;
 import std_msgs.Float32;
 
 public class InfoFragment extends Fragment {
     private final static String TAG=InfoFragment.class.getSimpleName();
     private FragmentInfoBinding binding;
     private InfoViewModel viewModel;
-    private Button button;
     private BatteryView batteryView;
+    private ImuAccView imuAccView;
+    private RpyView rpyView;
+    private TemperatureView temperatureView;
+    private MapInfoVIew mapInfoVIew;
     public static InfoFragment newInstance() {
         return new InfoFragment();
     }
@@ -44,18 +52,25 @@ public class InfoFragment extends Fragment {
         viewModel=new ViewModelProvider(requireActivity()).get(InfoViewModel.class);
         viewModel.setViewLifecycleOwner(getViewLifecycleOwner());
         batteryView=getView().findViewById(R.id.battery_view);
+        temperatureView=getView().findViewById(R.id.temperature_view);
+        imuAccView=getView().findViewById(R.id.imu_acc_view);
+        rpyView=getView().findViewById(R.id.rpyView);
+        //mapInfoVIew=getView().findViewById(R.id.navS);
         viewModel.getRosDate().observe(getViewLifecycleOwner(),rosData -> {
-            if(rosData.getTopic().name.toLowerCase().contains("battery")){
+            if(rosData.getTopic().name.toLowerCase().contains("m_vi")){
                 batteryView.onNewMessage((rosData.getMessage()));
-            }/*else if(rosData.getTopic().name.toLowerCase().contains("imu")){
-                binding.imu.setText(rosData.getMessage().toString());
-            }else if(rosData.getTopic().name.toLowerCase().contains("navSatFix")){
-                binding.navSatFix.setText(rosData.getMessage().toString());
+            }else if(rosData.getTopic().name.toLowerCase().contains("data_raw")){
+                imuAccView.onNewMessage(rosData.getMessage());
+                //imuAngView.onNewMessage(rosData.getMessage());
+            }else if(rosData.getTopic().name.contains("navSatFix")){
+                //mapInfoVIew.onNewMessage(rosData.getMessage());
             }else if(rosData.getTopic().name.toLowerCase().contains("temperature")){
-                binding.temperature.setText(rosData.getMessage().toString());
-            }else if(rosData.getTopic().type.contains("Float32")){
-                binding.other.setText(rosData.getTopic().name+":"+((Float32)rosData.getMessage()).getData());
-            }*/
+                temperatureView.onNewMessage(rosData.getMessage());
+            }else if(rosData.getTopic().name.contains("Float32")){
+                //binding.other.setText(rosData.getTopic().name+":"+((Float32)rosData.getMessage()).getData());
+            }else if(rosData.getTopic().name.contains("rpy")){
+                rpyView.onNewMessage(rosData.getMessage());
+            }
         });
         /*viewModel.getBattery().observe(getViewLifecycleOwner(),battery->{
 
@@ -81,8 +96,9 @@ public class InfoFragment extends Fragment {
 
     }
 
-    /*@Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-    }*/
+    @Override
+    public void onDestroyView(){
+        super.onDestroyView();
+        binding=null;
+    }
 }

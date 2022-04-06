@@ -34,6 +34,7 @@ public class BatteryView extends ViewGroup {
     Paint outerPaint;
     Paint innerPaint;
     Paint textPaint;
+    Paint bgPaint;
     private Paint highlightPaint;
     int level;
     boolean charging;
@@ -81,6 +82,9 @@ public class BatteryView extends ViewGroup {
         textPaint.setColor(getResources().getColor(R.color.whiteHigh));
         textPaint.setTextAlign(Paint.Align.CENTER);
         textPaint.setTextSize(textSize);
+
+        bgPaint = new Paint();
+        bgPaint.setColor(getResources().getColor(R.color.white));
         this.setWillNotDraw(false);
 
         updateColor();
@@ -152,6 +156,8 @@ public class BatteryView extends ViewGroup {
         float right = width - borderWidth/2;
         float top = borderWidth * 2;
         float bottom = height - borderWidth - textSize;
+
+        canvas.drawRect(0,0,getWidth(),getHeight(),bgPaint);
 
         // Draw pad
         canvas.drawRoundRect(middleX - width/4, top - borderWidth,

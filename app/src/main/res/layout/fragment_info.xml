@@ -8,42 +8,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-        <!--<TextView
-            android:id="@+id/temperature"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:text="temperature"
-            android:gravity="center"
-            android:background="@color/purple_200"
-            />
-        <TextView
-            android:id="@+id/battery"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:text="nav"
-            android:background="#00fff0"/>
-        <TextView
-            android:id="@+id/imu"
-            android:background="#eedd99"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            />
-        <TextView
-            android:id="@+id/navSatFix"
-            android:background="#eeddee"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            />
-        <TextView
-            android:id="@+id/other"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:background="@color/purple_200"/>
-        <Button
-            android:id="@+id/addAllTopic"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@color/delete_red"/>-->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -52,6 +16,7 @@
             android:layout_weight="0.5">
             <edu.czb.ros_app.widgets.battey.BatteryView
                 android:id="@+id/battery_view"
+                android:background="@color/white"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="0.5"
@@ -62,6 +27,7 @@
 
             </edu.czb.ros_app.widgets.battey.BatteryView>
             <edu.czb.ros_app.widgets.temperature.TemperatureView
+                android:id="@+id/temperature_view"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="0.5"
@@ -78,7 +44,8 @@
             android:gravity="top"
             android:layout_weight="0.5"
             android:orientation="horizontal">
-            <edu.czb.ros_app.widgets.battey.BatteryView
+            <edu.czb.ros_app.widgets.imu.ImuAccView
+                android:id="@+id/imu_acc_view"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="0.5"
@@ -87,8 +54,18 @@
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp">
 
-            </edu.czb.ros_app.widgets.battey.BatteryView>
-            <edu.czb.ros_app.widgets.battey.BatteryView
+            </edu.czb.ros_app.widgets.imu.ImuAccView>
+
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="top"
+            android:layout_weight="0.5"
+            android:orientation="horizontal">
+            <!--<edu.czb.ros_app.widgets.imu.ImuAngView
+                android:id="@+id/imu_ang_view"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="0.5"
@@ -97,7 +74,14 @@
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp">
 
-            </edu.czb.ros_app.widgets.battey.BatteryView>
+            </edu.czb.ros_app.widgets.imu.ImuAngView>-->
+            <edu.czb.ros_app.widgets.imu.RpyView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/rpyView">
+
+            </edu.czb.ros_app.widgets.imu.RpyView>
+
 
         </LinearLayout>
     </LinearLayout>
