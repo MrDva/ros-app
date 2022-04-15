@@ -30,4 +30,7 @@ public class BaseEntity {
     public Topic getTopic() {
         return topic;
     }
+    public void setTopic(Topic topic) {
+        this.topic=topic;
+    }
 }

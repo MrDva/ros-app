@@ -46,7 +46,7 @@
                         android:layout_height="100dp"
                         android:layout_gravity="center"
                         android:background="@drawable/button_selector"
-                        android:text="A" />
+                        android:text="自动控制" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -61,7 +61,7 @@
                         android:layout_height="100dp"
                         android:layout_gravity="center"
                         android:background="@drawable/button_selector"
-                        android:text="B" />
+                        android:text="双手柄控制" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -85,7 +85,7 @@
                         android:layout_height="100dp"
                         android:layout_gravity="center"
                         android:background="@drawable/button_selector"
-                        android:text="X" />
+                        android:text="单手柄控制" />
 
                 </LinearLayout>
 
@@ -101,7 +101,7 @@
                         android:layout_height="100dp"
                         android:layout_gravity="center"
                         android:background="@drawable/button_selector"
-                        android:text="Y" />
+                        android:text="初始化" />
                 </LinearLayout>
 
             </LinearLayout>

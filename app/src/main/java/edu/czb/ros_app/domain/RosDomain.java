@@ -97,6 +97,21 @@ public class RosDomain {
         rosRepository.disconnectFromMaster();
     }
 
+    public void initStaticNodes(){
+        rosRepository.initStaticNodes();
+    }
+
+    public void clearAllNodes(){
+        rosRepository.clearAllNodes();
+    }
+
+    public void unregisterAllNodes(){
+        rosRepository.unregisterAllNodes();
+    }
+    public void registerAllNodes(){
+        rosRepository.registerAllNodes();
+    }
+
     public void addAllTopic(){
         rosRepository.addAllTopic();
     }

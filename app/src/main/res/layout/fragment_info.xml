@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/white"
     android:layout_height="match_parent">
     <LinearLayout
@@ -38,13 +39,13 @@
 
             </edu.czb.ros_app.widgets.temperature.TemperatureView>
         </LinearLayout>
-        <LinearLayout
+        <!--<LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="top"
             android:layout_weight="0.5"
-            android:orientation="horizontal">
-            <edu.czb.ros_app.widgets.imu.ImuAccView
+            android:orientation="vertical">
+            &lt;!&ndash;<edu.czb.ros_app.widgets.imu.ImuAccView
                 android:id="@+id/imu_acc_view"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -54,10 +55,58 @@
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp">
 
-            </edu.czb.ros_app.widgets.imu.ImuAccView>
+            </edu.czb.ros_app.widgets.imu.ImuAccView>&ndash;&gt;
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <Button
+                    android:id="@+id/button_yaw_up"
+                    android:text="yaw_up"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <Button
+                    android:id="@+id/button_yaw_down"
+                    android:text="yaw_down"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <Button
+                    android:id="@+id/button_pitch_up"
+                    android:text="pitch_up"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <Button
+                    android:id="@+id/button_pitch_down"
+                    android:text="pitch_down"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <Button
+                    android:id="@+id/button_roll_up"
+                    android:text="roll_up"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <Button
+                    android:id="@+id/button_roll_down"
+                    android:text="roll_down"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
 
 
-        </LinearLayout>
+            &lt;!&ndash;<TextView
+                android:id="@+id/rpy_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>&ndash;&gt;
+
+
+        </LinearLayout>-->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -85,5 +134,15 @@
 
         </LinearLayout>
     </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/switch_history"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|center"
+        android:background="@drawable/button_selector"
+        android:src="@drawable/ic_baseline_switch_left_24"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

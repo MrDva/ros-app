@@ -55,5 +55,25 @@
         app:popUpTo="@id/main_navigation"
         app:popUpToInclusive="true"/>
 
+    <fragment
+        android:id="@+id/infoChartFragment"
+        android:name="edu.czb.ros_app.ui.fragments.InfoChartFragment"
+        tools:layout="@layout/fragment_info_chart"/>
+    <action
+        android:id="@+id/action_to_info_chart"
+        app:destination="@+id/infoChartFragment"
+        app:popUpTo="@id/main_navigation"
+        app:popUpToInclusive="true"/>
+
+    <fragment
+        android:id="@+id/logFragment"
+        android:name="edu.czb.ros_app.ui.fragments.LogFragment"
+        tools:layout="@layout/fragment_log"/>
+    <action
+        android:id="@+id/action_to_log"
+        app:destination="@+id/logFragment"
+        app:popUpTo="@id/main_navigation"
+        app:popUpToInclusive="true"/>
+
 
 </navigation>

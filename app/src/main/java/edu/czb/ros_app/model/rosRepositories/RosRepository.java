@@ -1,9 +1,11 @@
 package edu.czb.ros_app.model.rosRepositories;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
@@ -20,6 +22,7 @@ import org.ros.namespace.GraphName;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeListener;
 import org.ros.rosjava_geometry.FrameTransformTree;
+import org.ros.rosjava_geometry.Vector3;
 
 import java.lang.ref.WeakReference;
 import java.net.URI;
@@ -27,7 +30,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import edu.czb.ros_app.model.db.DataStorage;
 import edu.czb.ros_app.model.entities.MasterEntity;
+import edu.czb.ros_app.model.entities.info.BatteryStateEntity;
+import edu.czb.ros_app.model.entities.info.RpyDataEntity;
+import edu.czb.ros_app.model.entities.info.TempDataEntity;
 import edu.czb.ros_app.model.entities.widgets.BaseEntity;
 import edu.czb.ros_app.model.enums.ConnectionStateType;
 import edu.czb.ros_app.model.rosRepositories.connection.ConnectionCheckTask;
@@ -36,6 +43,7 @@ import edu.czb.ros_app.model.rosRepositories.message.BaseData;
 import edu.czb.ros_app.model.rosRepositories.message.RosData;
 
 import edu.czb.ros_app.model.rosRepositories.message.Topic;
+import edu.czb.ros_app.model.rosRepositories.message.TopicName;
 import edu.czb.ros_app.model.rosRepositories.node.AbstractNode;
 import edu.czb.ros_app.model.rosRepositories.node.NodeMainExecutorService;
 import edu.czb.ros_app.model.rosRepositories.node.NodeMainExecutorServiceListener;
@@ -43,6 +51,7 @@ import edu.czb.ros_app.model.rosRepositories.node.PublisherNode;
 import edu.czb.ros_app.model.rosRepositories.node.SubscriberNode;
 import edu.czb.ros_app.widgets.battey.BatteryEntity;
 import edu.czb.ros_app.widgets.battey.BatteryView;
+import edu.czb.ros_app.widgets.imu.DestYawEntity;
 import edu.czb.ros_app.widgets.imu.ImuEntity;
 import edu.czb.ros_app.widgets.imu.RpyEntity;
 import edu.czb.ros_app.widgets.joystick.JoystickEntity;
@@ -50,6 +59,7 @@ import edu.czb.ros_app.widgets.map.MapEntity;
 import edu.czb.ros_app.widgets.map.MapPathEntity;
 import edu.czb.ros_app.widgets.temperature.TemperatureEntity;
 import geometry_msgs.TransformStamped;
+import sensor_msgs.BatteryState;
 import sensor_msgs.Temperature;
 import tf2_msgs.TFMessage;
 
@@ -64,7 +74,7 @@ import tf2_msgs.TFMessage;
  */
 public class RosRepository implements MessageListener<RosData> {
     private static final String TAG=RosRepository.class.getSimpleName();
-
+    private Context context;
     private MasterEntity masterEntity;
     private final WeakReference<Context> contextReference;
     private final MutableLiveData<ConnectionStateType> rosConnected;
@@ -73,6 +83,7 @@ public class RosRepository implements MessageListener<RosData> {
     private final MutableLiveData<RosData> receivedMapData;
     private final HashMap<Topic, AbstractNode> currentNodes;
     private NodeConfiguration nodeConfiguration;
+    public final DataStorage dataStorage;
     //private FrameTransformTree frameTransformTree;
     public RosRepository(Context context){
         this.contextReference=new WeakReference<>(context);
@@ -80,6 +91,8 @@ public class RosRepository implements MessageListener<RosData> {
         this.rosConnected = new MutableLiveData<>(ConnectionStateType.DISCONNECTED);
         this.receivedData = new MutableLiveData<>();
         this.receivedMapData=new MutableLiveData<>();
+        this.context=context;
+        this.dataStorage=DataStorage.getInstance(context);
        // this.frameTransformTree = TransformProvider.getInstance().getTree();
         this.initStaticNodes();
     }
@@ -95,10 +108,33 @@ public class RosRepository implements MessageListener<RosData> {
                 Log.i(TAG,transform.toString());
             }
         }
-        if(message.getTopic().name.contains("navSatFix")){
+        if(message.getTopic().name.equals(getTopicName(TopicName.MAP))){
             this.receivedMapData.postValue(message);
         }
         this.receivedData.postValue(message);
+        String type=message.getTopic().type;
+        if(message.getTopic().name.equals(getTopicName(TopicName.BATTERY))){
+            BatteryState batteryState=(BatteryState)(message.getMessage());
+            BatteryStateEntity batteryStateEntity=new BatteryStateEntity();
+            batteryStateEntity.createdTime=System.currentTimeMillis();
+            batteryStateEntity.current=batteryState.getCurrent();
+            batteryStateEntity.capacity=batteryState.getCapacity();
+            batteryStateEntity.voltage=batteryState.getVoltage();
+            batteryStateEntity.charge=batteryState.getCharge();
+            TempDataEntity tempDataEntity=new TempDataEntity();
+            tempDataEntity.createdTime= batteryStateEntity.createdTime;
+            tempDataEntity.temp=batteryState.getPercentage();
+            dataStorage.addBattery(batteryStateEntity);
+            dataStorage.addTempDataEntity(tempDataEntity);
+        }else if(message.getTopic().name.equals((getTopicName(TopicName.RPY)))){
+            geometry_msgs.Vector3 vector3=(geometry_msgs.Vector3)(message.getMessage());
+            RpyDataEntity entity=new RpyDataEntity();
+            entity.createdTime=System.currentTimeMillis();
+            entity.roll=vector3.getX();
+            entity.yaw=vector3.getZ();
+            entity.pitch=vector3.getY();
+            dataStorage.addRpy(entity);
+        }
     }
 
     /**
@@ -171,13 +207,17 @@ public class RosRepository implements MessageListener<RosData> {
         nodeMainExecutorService.shutdown();
     }
 
-    private void registerAllNodes() {
+    public void registerAllNodes() {
         for (AbstractNode node: currentNodes.values()) {
             this.registerNode(node);
         }
     }
 
-    private void unregisterAllNodes() {
+    public void clearAllNodes(){
+        currentNodes.clear();
+    }
+
+    public void unregisterAllNodes() {
         for (AbstractNode node: currentNodes.values()) {
             this.unregisterNode(node);
         }
@@ -337,7 +377,7 @@ public class RosRepository implements MessageListener<RosData> {
     /**
      * Initialize static nodes eg. tf and tf_static.
      */
-    private void initStaticNodes() {
+    public void initStaticNodes() {
         Log.i(TAG,"initStaticNodes");
         Topic tfTopic = new Topic("/tf", TFMessage._TYPE);
         SubscriberNode tfNode = new SubscriberNode(this);
@@ -349,41 +389,51 @@ public class RosRepository implements MessageListener<RosData> {
         tfStaticNode.setTopic(tfStaticTopic);
         currentNodes.put(tfStaticTopic, tfStaticNode);
 
-        BatteryEntity batteryEntity=new BatteryEntity();
+        BatteryEntity batteryEntity=new BatteryEntity(getTopicName(TopicName.BATTERY));
         SubscriberNode node=new SubscriberNode(this);
         node.setTopic(batteryEntity.getTopic());
         currentNodes.put(batteryEntity.getTopic(),node);
 
-        MapEntity mapEntity=new MapEntity();
+        MapEntity mapEntity=new MapEntity(getTopicName(TopicName.MAP));
         node=new SubscriberNode(this);
         node.setTopic(mapEntity.getTopic());
         currentNodes.put(mapEntity.getTopic(),node);
 
-        TemperatureEntity temperatureEntity=new TemperatureEntity();
+        TemperatureEntity temperatureEntity=new TemperatureEntity(getTopicName(TopicName.TEMPERATURE));
         node=new SubscriberNode(this);
         node.setTopic(temperatureEntity.getTopic());
         currentNodes.put(temperatureEntity.getTopic(),node);
 
-        ImuEntity imuEntity=new ImuEntity();
+        ImuEntity imuEntity=new ImuEntity(getTopicName(TopicName.IMU));
         node=new SubscriberNode(this);
         node.setTopic(imuEntity.getTopic());
         currentNodes.put(imuEntity.getTopic(),node);
 
-        RpyEntity rpyEntity=new RpyEntity();
+        RpyEntity rpyEntity=new RpyEntity(getTopicName(TopicName.RPY));
         node=new SubscriberNode(this);
         node.setTopic(rpyEntity.getTopic());
         currentNodes.put(rpyEntity.getTopic(),node);
 
-        JoystickEntity  joystickEntity=new JoystickEntity();
+        DestYawEntity destYawEntity=new DestYawEntity(getTopicName(TopicName.DEST_YAW));
+        node=new SubscriberNode(this);
+        node.setTopic(destYawEntity.getTopic());
+        currentNodes.put(destYawEntity.getTopic(),node);
+
+        JoystickEntity  joystickEntity=new JoystickEntity(getTopicName(TopicName.JOY));
         PublisherNode publisherNode=new PublisherNode();
         publisherNode.setTopic(joystickEntity.getTopic());
         currentNodes.put(joystickEntity.getTopic(),publisherNode);
 
-        MapPathEntity mapPathEntity=new MapPathEntity();
+        MapPathEntity mapPathEntity=new MapPathEntity(getTopicName(TopicName.MAP_PATH));
         publisherNode=new PublisherNode();
         publisherNode.setTopic(mapPathEntity.getTopic());
         currentNodes.put(mapPathEntity.getTopic(),publisherNode);
 
+    }
+
+    private String getTopicName(String TopicNameKey){
+        SharedPreferences topicInfo=context.getSharedPreferences(TopicName.TOPIC_KEY,Context.MODE_PRIVATE);
+        return topicInfo.getString(TopicNameKey,TopicNameKey);
     }
 
 }

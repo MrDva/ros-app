@@ -67,7 +67,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:imeOptions="actionDone"
-                android:inputType="number"
+                android:inputType="numberDecimal"
                 android:singleLine="true" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -228,18 +228,20 @@
             app:srcCompat="@drawable/ic_connected"
             app:tint="@color/delete_red" />
 
-        <Button
-            android:id="@+id/help_button"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/button_settings"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/need_help_button"
-            android:textSize="12sp"
+            android:layout_gravity="left|top"
+            android:src="@drawable/ic_baseline_settings_24"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/connectButton" />
-
+            app:layout_constraintTop_toBottomOf="@+id/connectButton"
+            tools:layout_editor_absoluteX="300dp"
+            tools:layout_editor_absoluteY="477dp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 </androidx.core.widget.NestedScrollView>

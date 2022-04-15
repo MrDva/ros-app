@@ -36,7 +36,7 @@
             android:layout_height="match_parent"
             android:layout_weight="0.5">
 
-            <edu.czb.ros_app.widgets.joystick.JoystickView
+            <edu.czb.ros_app.widgets.joystick.JoystickView1
                 android:id="@+id/joystick2_1"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

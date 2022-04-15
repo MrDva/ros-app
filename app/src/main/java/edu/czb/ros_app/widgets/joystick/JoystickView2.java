@@ -34,6 +34,7 @@ public class JoystickView2 extends SurfaceView implements SurfaceHolder.Callback
     private float baseRadius;
     private float hatRadius;
     private float ratio=6.18f;
+    public boolean down=false;
     private MutableLiveData<float[]> axesLiveData;
     private MutableLiveData<int[]> buttonLiveData;
     private MutableLiveData<JoystickData> joystickLiveData;
@@ -150,14 +151,16 @@ public class JoystickView2 extends SurfaceView implements SurfaceHolder.Callback
                     int[] button=new int[6];
                     updateJoyStickLiveDate(axes,button);
                 }
+                down=false;
             }else{
+                down=true;
                 preState=false;
                 if(displacement<baseRadius){
                     drawJoystick(e.getX(),e.getY());
                     float[] axes=new float[6];
                     int[] button=new int[6];
-                    axes[0]=(e.getX()-centerX)/baseRadius;
-                    axes[1]=(e.getY()-centerY)/baseRadius;
+                    axes[1]=(e.getX()-centerX)/baseRadius;
+                    axes[0]=(centerY-e.getY())/baseRadius;
                     updateJoyStickLiveDate(axes,button);
                 }else{
                     float ratio=baseRadius/displacement;
@@ -166,8 +169,8 @@ public class JoystickView2 extends SurfaceView implements SurfaceHolder.Callback
                     drawJoystick(constrainedX,constrainedY);
                     float[] axes=new float[6];
                     int[] button=new int[6];
-                    axes[0]=(constrainedX-centerX)/baseRadius;
-                    axes[1]=(constrainedY-centerY)/baseRadius;
+                    axes[1]=(constrainedX-centerX)/baseRadius;
+                    axes[0]=-((constrainedY-centerY)/baseRadius);
                     /*button[0]=1;
                     button[1]=2;
                     button[2]=2;*/

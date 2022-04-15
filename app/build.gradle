@@ -91,7 +91,8 @@ dependencies {
     // fix the conflict.
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
 
-
+    //chart
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 
 
 }

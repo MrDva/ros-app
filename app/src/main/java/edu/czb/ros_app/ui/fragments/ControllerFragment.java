@@ -79,48 +79,73 @@ public class ControllerFragment extends Fragment  {
         });*/
         joystickView.getJoystickLiveData().observe(getViewLifecycleOwner(),joystickData -> {
             controllerViewModel.getRosDomain().publicData(joystickData);
-            int sum=0;
+            /*int sum=0;
             for (int i : joystickData.button) {
                 sum+=i;
             }
             if(sum>0){
                 joystickView.updateJoyStickLiveDate(new float[6],new int[6]);
-            }
+            }*/
         });
 
         floatingActionButton.setOnClickListener(l->{
             controller.navigate(R.id.action_to_controller2);
         });
-
-        AButton.setOnClickListener(l->{
-            float[] axes=new float[6];
-            int[] button=new int[6];
-            button[1]=1;
-            joystickView.updateJoyStickLiveDate(axes,button);
-
-
+        AButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction()==MotionEvent.ACTION_UP){
+                    joystickView.updateJoyStickLiveDate(new float[6],new int[6]);
+                }else {
+                    float[] axes=new float[6];
+                    int[] button=new int[6];
+                    button[1]=1;
+                    joystickView.updateJoyStickLiveDate(axes,button);
+                }
+                return false;
+            }
         });
-        BButton.setOnClickListener(l->{
-            float[] axes=new float[6];
-            int[] button=new int[6];
-            button[2]=1;
-            joystickView.updateJoyStickLiveDate(axes,button);
-
-
+        BButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction()==MotionEvent.ACTION_UP){
+                    joystickView.updateJoyStickLiveDate(new float[6],new int[6]);
+                }else {
+                    float[] axes=new float[6];
+                    int[] button=new int[6];
+                    button[2]=1;
+                    joystickView.updateJoyStickLiveDate(axes,button);
+                }
+                return false;
+            }
         });
-        XButton.setOnClickListener(l->{
-            float[] axes=new float[6];
-            int[] button=new int[6];
-            button[0]=1;
-            joystickView.updateJoyStickLiveDate(axes,button);
-
+        XButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction()==MotionEvent.ACTION_UP){
+                    joystickView.updateJoyStickLiveDate(new float[6],new int[6]);
+                }else {
+                    float[] axes=new float[6];
+                    int[] button=new int[6];
+                    button[0]=1;
+                    joystickView.updateJoyStickLiveDate(axes,button);
+                }
+                return false;
+            }
         });
-        YButton.setOnClickListener(l->{
-            float[] axes=new float[6];
-            int[] button=new int[6];
-            button[4]=1;
-            joystickView.updateJoyStickLiveDate(axes,button);
-
+        YButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction()==MotionEvent.ACTION_UP){
+                    joystickView.updateJoyStickLiveDate(new float[6],new int[6]);
+                }else {
+                    float[] axes=new float[6];
+                    int[] button=new int[6];
+                    button[3]=1;
+                    joystickView.updateJoyStickLiveDate(axes,button);
+                }
+                return false;
+            }
         });
 
     }

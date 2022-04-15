@@ -31,6 +31,13 @@ public class BatteryView extends ViewGroup {
     public static final String TAG = BatteryView.class.getSimpleName();
     public static final int MAX_LEVEL = 5;
 
+    private double current;
+    private double charge;
+    private double capacity;
+    private double voltage;
+
+
+
     Paint outerPaint;
     Paint innerPaint;
     Paint textPaint;
@@ -40,7 +47,7 @@ public class BatteryView extends ViewGroup {
     boolean charging;
     float textSize;
     float borderWidth;
-    String displayedText;
+
     private boolean displayVoltage=true;
 
     public BatteryView(Context context) {
@@ -56,7 +63,7 @@ public class BatteryView extends ViewGroup {
         float textDip = 18f;
         float borderDip = 10f;
         displayVoltage=true;
-        displayedText=String.format("%.1fV", 0.3f);
+
         highlightPaint = new Paint();
         textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, textDip,
                 getResources().getDisplayMetrics());
@@ -64,7 +71,7 @@ public class BatteryView extends ViewGroup {
                 getResources().getDisplayMetrics());
 
         borderWidth = 10;
-        level = 3;
+        level = -1;
 
         // Init paints
         innerPaint = new Paint();
@@ -96,22 +103,22 @@ public class BatteryView extends ViewGroup {
         BatteryState state = (BatteryState)message;
 
         this.charging = state.getPowerSupplyStatus() == BatteryState.POWER_SUPPLY_STATUS_CHARGING;
-
-        if (displayVoltage) {
-            this.updateVoltage(state.getVoltage());
-        }
-        this.updatePercentage(state.getPercentage());
+        current=state.getCurrent();
+        charge=state.getCharge();
+        voltage=state.getVoltage();
+        capacity=state.getCapacity();
+        this.updatePercentage((float) ((200-capacity)/200.0));
         this.invalidate();
     }
     private void updatePercentage(float value) {
         int perc = (int)(value * 100);
-        displayedText = perc + "%";
+
         level = Math.min(5, perc / 20 + 1);
         Log.i(TAG, "percentage:"+perc+" Level"+level);
         updateColor();
     }
 
-    private void updateVoltage(float value) {
+    /*private void updateVoltage(float value) {
         if (value >= 10) {
             displayedText = String.format("%.1fV", value);
         } else {
@@ -120,7 +127,7 @@ public class BatteryView extends ViewGroup {
 
         level = -1;
         updateColor();
-    }
+    }*/
     private void updateColor() {
         int color;
 
@@ -155,7 +162,7 @@ public class BatteryView extends ViewGroup {
         float left = borderWidth/2;
         float right = width - borderWidth/2;
         float top = borderWidth * 2;
-        float bottom = height - borderWidth - textSize;
+        float bottom = height - borderWidth - textSize*5;
 
         canvas.drawRect(0,0,getWidth(),getHeight(),bgPaint);
 
@@ -207,7 +214,11 @@ public class BatteryView extends ViewGroup {
         }
 
         // Draw status text
-        canvas.drawText(displayedText, middleX, height, textPaint);
+        canvas.drawText("电流:"+String.format("%.2f", current)+"A", middleX, height-textSize*4, textPaint);
+        canvas.drawText("电压:"+String.format("%.2f",voltage)+"V", middleX, height-textSize*3, textPaint);
+        canvas.drawText("功率:"+String.format("%.2f",capacity)+"W", middleX, height-textSize*2, textPaint);
+        canvas.drawText("消耗电量:"+String.format("%.2f",charge)+"Wh", middleX, height-textSize, textPaint);
+
     }
 
    /* @Override

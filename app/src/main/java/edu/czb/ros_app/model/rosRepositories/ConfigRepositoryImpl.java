@@ -67,7 +67,7 @@ public class ConfigRepositoryImpl implements ConfigRepository{
         if (mInstance == null) {
             mInstance = new ConfigRepositoryImpl(application);
         }
-
         return mInstance;
     }
+
 }

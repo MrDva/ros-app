@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+
+        <ImageView
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_gravity="center"/>
+
+        <TextView
+            android:id="@+id/my_location_lat"
+            android:layout_width="138dp"
+            android:layout_height="25dp"
+            android:padding="5dip"
+            android:textColor="#4444ff"
+            android:textSize="10dp"
+            android:singleLine="false"/>
+        <TextView
+            android:id="@+id/my_location_lng"
+            android:layout_width="138dp"
+            android:layout_height="25dp"
+            android:padding="5dip"
+            android:textColor="#4444ff"
+            android:textSize="10dp"
+            android:singleLine="false"/>
+
+</LinearLayout>

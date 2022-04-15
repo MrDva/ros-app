@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical" >
+        <TextView
+            android:id="@+id/boatLocation_lat"
+            android:layout_width="138dp"
+            android:layout_height="wrap_content"
+            android:padding="5dip"
+            android:textColor="#ff0000"
+            android:textSize="10dp"
+            android:singleLine="false"/>
+        <TextView
+            android:id="@+id/boatLocation_lng"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dip"
+            android:textColor="#ff0000"
+            android:textSize="10dp"
+            android:singleLine="false"/>
+    </LinearLayout>
+    <ImageView
+        android:id="@+id/boatImage"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:padding="2dip"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_baseline_directions_boat_24"
+        app:tint="@color/delete_red"
+        android:layout_gravity="center"
+        />
+</LinearLayout>

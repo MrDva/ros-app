@@ -2,20 +2,18 @@ package edu.czb.ros_app.model.db;
 
 import android.content.Context;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.room.Database;
-import androidx.room.DatabaseConfiguration;
-import androidx.room.InvalidationTracker;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
-import androidx.sqlite.db.SupportSQLiteOpenHelper;
 
 import java.util.List;
 
-import edu.czb.ros_app.R;
 import edu.czb.ros_app.model.entities.MasterEntity;
-import edu.czb.ros_app.model.entities.widgets.BaseEntity;
+import edu.czb.ros_app.model.entities.info.BatteryStateEntity;
+import edu.czb.ros_app.model.entities.info.RpyDataEntity;
+import edu.czb.ros_app.model.entities.info.TempDataEntity;
 import edu.czb.ros_app.utils.Constants;
 import edu.czb.ros_app.utils.LambdaTask;
 
@@ -29,7 +27,7 @@ import edu.czb.ros_app.utils.LambdaTask;
  * @Version: 1.0
  */
 @Database(entities =
-        { MasterEntity.class},
+        { MasterEntity.class,BatteryStateEntity.class,RpyDataEntity.class,TempDataEntity.class},
         version = 6, exportSchema = false)
 public abstract class DataStorage extends RoomDatabase {
     private static DataStorage instance;
@@ -66,6 +64,63 @@ public abstract class DataStorage extends RoomDatabase {
         return masterDao().getMaster(id);
     }
 
+    //Battery methods --------------------------------------------------------------------------
+
+    public abstract BatteryStateDao batteryStateDao();
+
+    public void addBattery(BatteryStateEntity battery){
+        new LambdaTask(()->batteryStateDao().insert(battery)).execute();
+    }
+
+    public void updateBattery(BatteryStateEntity battery){
+        new LambdaTask(()->batteryStateDao().update(battery)).execute();
+    }
+
+    public void deleteAllBattery(){
+        new LambdaTask(()->batteryStateDao().deleteAllData()).execute();
+    }
+
+    public LiveData<List<BatteryStateEntity>> getBatteryLimitList(long limit){
+        return batteryStateDao().getLimitListData(limit);
+    }
+
+    //Rpy methods-------------------------------------------------------------------------------
+    public abstract RpyDao RpyDao();
+
+    public void addRpy(RpyDataEntity rpyDataEntity){
+        new LambdaTask(()->RpyDao().insert(rpyDataEntity)).execute();
+    }
+
+    public void updateRpy(RpyDataEntity rpyDataEntity){
+        new LambdaTask(()->RpyDao().update(rpyDataEntity)).execute();
+    }
+
+    public void deleteAllRpy(){
+        new LambdaTask(()->RpyDao().deleteAllData()).execute();
+    }
+
+    public LiveData<List<RpyDataEntity>> getRpyLimitList(long limit){
+        return RpyDao().getLimitListData(limit);
+    }
+
+    //temperature methods------------------------------------------------------------------
+    public abstract TemperatureDao temperatureDao();
+
+    public void addTempDataEntity(TempDataEntity tempDataEntity){
+        new LambdaTask(()->temperatureDao().insert(tempDataEntity)).execute();
+    }
+
+    public void updateBattery(TempDataEntity tempDataEntity){
+        new LambdaTask(()->temperatureDao().update(tempDataEntity)).execute();
+    }
+
+    public void deleteAllTempData(){
+        new LambdaTask(()->temperatureDao().deleteAllData()).execute();
+    }
+
+    public LiveData<List<TempDataEntity>> getTempLimitList(long limit){
+        return temperatureDao().getLimitListData(limit);
+    }
 
     // Widget methods ------------------------------------------------------------------------------
 

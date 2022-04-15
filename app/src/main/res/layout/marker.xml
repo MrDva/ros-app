@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical" >
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -15,6 +16,7 @@
             android:padding="2dip"
             android:scaleType="fitXY"
             android:src="@drawable/ic_baseline_room_24"
+            app:tint="@color/delete_red"
             />
         <TextView
             android:id="@+id/destLocation"

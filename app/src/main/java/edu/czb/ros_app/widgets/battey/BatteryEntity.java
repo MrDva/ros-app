@@ -2,6 +2,7 @@ package edu.czb.ros_app.widgets.battey;
 
 import edu.czb.ros_app.model.entities.widgets.BaseEntity;
 import edu.czb.ros_app.model.rosRepositories.message.Topic;
+import edu.czb.ros_app.model.rosRepositories.message.TopicName;
 import sensor_msgs.BatteryState;
 
 /**
@@ -18,8 +19,12 @@ public class BatteryEntity extends BaseEntity {
 
 
     public BatteryEntity() {
-        this.topic = new Topic("/sensor/m_VI", BatteryState._TYPE);
+        this.topic = new Topic(TopicName.BATTERY, BatteryState._TYPE);
         this.displayVoltage = false;
+    }
+
+    public BatteryEntity(String topicName){
+        this.topic=new Topic(topicName,BatteryState._TYPE);
     }
 
 

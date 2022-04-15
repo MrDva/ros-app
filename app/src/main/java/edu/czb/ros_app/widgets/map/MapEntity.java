@@ -2,6 +2,7 @@ package edu.czb.ros_app.widgets.map;
 
 import edu.czb.ros_app.model.entities.widgets.BaseEntity;
 import edu.czb.ros_app.model.rosRepositories.message.Topic;
+import edu.czb.ros_app.model.rosRepositories.message.TopicName;
 import sensor_msgs.BatteryState;
 import sensor_msgs.NavSatFix;
 
@@ -19,7 +20,10 @@ public class MapEntity extends BaseEntity {
 
 
     public MapEntity() {
-        this.topic = new Topic("navSatFix", NavSatFix._TYPE);
+        this.topic = new Topic(TopicName.MAP, NavSatFix._TYPE);
         this.displayVoltage = false;
+    }
+    public MapEntity(String topicName){
+        this.topic=new Topic(topicName,NavSatFix._TYPE);
     }
 }

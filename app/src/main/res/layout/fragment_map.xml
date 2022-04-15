@@ -38,6 +38,13 @@
         android:src="@drawable/ic_baseline_send_24"
         android:layout_gravity="right|center"
         />
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/button_correct"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_baseline_build_24"
+        android:layout_gravity="left|top"
+        />
 
 
 </FrameLayout>

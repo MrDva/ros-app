@@ -16,6 +16,7 @@ import org.ros.internal.message.Message;
 
 import edu.czb.ros_app.R;
 import edu.czb.ros_app.widgets.battey.BatteryView;
+import sensor_msgs.BatteryState;
 import sensor_msgs.Temperature;
 
 /**
@@ -78,8 +79,8 @@ public class TemperatureView extends ViewGroup {
         textPaint.setTextSize(textSize);
     }
     public void onNewMessage(Message message){
-        Temperature temperature=(Temperature) message;
-        updateTemperature((float) temperature.getTemperature());
+        BatteryState temperature=(BatteryState) message;
+        updateTemperature((float) temperature.getPercentage());
         this.invalidate();
     }
     public void updateTemperature(float temperature){
@@ -126,7 +127,7 @@ public class TemperatureView extends ViewGroup {
         }
         canvas.drawText(String.valueOf("℃"),   bgWidth /2- bgWidth /24- bgWidth /12- bgWidth /20,yDegree,textPaint);
 
-
+        canvas.drawText(String.format("%.2f",temperature)+String.valueOf("℃"),bgWidth/2+bgWidth/6,bgHeight/2,textPaint);
     }
 
     private float paintGraduatedLine(Canvas canvas,int num,float begin,float end,int text){

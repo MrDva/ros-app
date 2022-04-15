@@ -26,4 +26,11 @@
         app:iconTint="@color/white"
         app:showAsAction="always"/>
 
+    <item
+        android:id="@+id/logFragment"
+        android:title="调试"
+        android:icon="@drawable/ic_baseline_bug_report_24"
+        app:showAsAction="always"
+        app:iconTint="@color/white"/>
+
 </menu>

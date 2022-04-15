@@ -3,6 +3,9 @@ package edu.czb.ros_app.ui.fragments;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.util.Log;
@@ -12,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.IdRes;
@@ -23,7 +27,9 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.common.base.Strings;
 
 import java.util.ArrayList;
 
@@ -33,6 +39,9 @@ import edu.czb.ros_app.model.entities.MasterEntity;
 import edu.czb.ros_app.model.enums.ConnectionStateType;
 import edu.czb.ros_app.model.rosRepositories.connection.ConnectionCheckTask;
 import edu.czb.ros_app.model.rosRepositories.connection.ConnectionListener;
+import edu.czb.ros_app.model.rosRepositories.message.TopicName;
+import edu.czb.ros_app.ui.dialog.CorrectLatLngDialog;
+import edu.czb.ros_app.ui.dialog.TopicNameSettingDialog;
 import edu.czb.ros_app.utils.NetWorkUtil;
 import edu.czb.ros_app.viewmodel.ConnectViewModel;
 
@@ -47,6 +56,8 @@ public class ConnectionConfigFragment extends Fragment implements TextView.OnEdi
     private AutoCompleteTextView ipAddressField;
     private TextInputLayout ipAddressLayout;
     private ArrayAdapter<String> ipArrayAdapter;
+    private FloatingActionButton buttonSettings;
+    private TopicNameSettingDialog topicNameSettingDialog;
 
     private ConnectViewModel connectViewModel;
 
@@ -73,6 +84,8 @@ public class ConnectionConfigFragment extends Fragment implements TextView.OnEdi
         ipAddressField=getView().findViewById(R.id.ipAddressTextView);
         ipAddressLayout=getView().findViewById(R.id.ipAddressLayout);
 
+        buttonSettings=getView().findViewById(R.id.button_settings);
+        buttonSettings.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#ff81D4FA")));
         ipItemList=new ArrayList<>();
         ipArrayAdapter=new ArrayAdapter<>(this.getContext(),R.layout.dropdown_menu_item,ipItemList);
         ipAddressField.setAdapter(ipArrayAdapter);
@@ -126,6 +139,10 @@ public class ConnectionConfigFragment extends Fragment implements TextView.OnEdi
         binding.disconnectButton.setOnClickListener(v->{
             connectViewModel.getRosDomain().getTopicList();
             connectViewModel.disconnectFromMaster();
+        });
+
+        buttonSettings.setOnClickListener(v->{
+            showEditDialog(v);
         });
 
     }
@@ -194,5 +211,59 @@ public class ConnectionConfigFragment extends Fragment implements TextView.OnEdi
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         return false;
+    }
+
+    public void saveTopic(String preTopicName,String topicName){
+        SharedPreferences topicInfo=getContext().getSharedPreferences(TopicName.TOPIC_KEY,Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor=topicInfo.edit();
+        editor.putString(preTopicName,Strings.isNullOrEmpty(topicName)?topicInfo.getString(preTopicName,preTopicName):topicName);
+        editor.commit();
+    }
+
+    public void showEditDialog(View view){
+        topicNameSettingDialog=new TopicNameSettingDialog(getActivity(),R.style.AppTheme,onClickListener);
+        topicNameSettingDialog.show();
+
+    }
+    private View.OnClickListener onClickListener=new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()) {
+                case R.id.btn_save_topic_name:
+                    try {
+                        saveTopic(TopicName.BATTERY,getTopicName(topicNameSettingDialog.text_battery,TopicName.BATTERY));
+                        saveTopic(TopicName.MAP,getTopicName(topicNameSettingDialog.text_map,TopicName.MAP));
+                        saveTopic(TopicName.MAP_PATH,getTopicName(topicNameSettingDialog.text_map_path,TopicName.MAP_PATH));
+                        saveTopic(TopicName.IMU,getTopicName(topicNameSettingDialog.text_imu,TopicName.IMU));
+                        saveTopic(TopicName.JOY,getTopicName(topicNameSettingDialog.text_joy,TopicName.JOY));
+                        saveTopic(TopicName.TEMPERATURE,getTopicName(topicNameSettingDialog.text_temp,TopicName.TEMPERATURE));
+                        saveTopic(TopicName.RPY,getTopicName(topicNameSettingDialog.text_rpy,TopicName.RPY));
+                        if(getContext().getString(R.string.connected).equals(binding.statusText.getText().toString())){
+                            connectViewModel.getRosDomain().unregisterAllNodes();
+                            connectViewModel.getRosDomain().clearAllNodes();
+                            connectViewModel.getRosDomain().initStaticNodes();
+                            connectViewModel.getRosDomain().registerAllNodes();
+                        }else{
+                            connectViewModel.getRosDomain().clearAllNodes();
+                            connectViewModel.getRosDomain().initStaticNodes();
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    topicNameSettingDialog.cancel();
+                    break;
+                case R.id.btn_cancel_topic_name:
+                    topicNameSettingDialog.cancel();
+                    break;
+            }
+
+        }
+    };
+    private String getTopicName(EditText editText,String topicName){
+        if(!Strings.isNullOrEmpty(editText.getText().toString())){
+            return editText.getText().toString();
+        }
+        return topicName;
     }
 }

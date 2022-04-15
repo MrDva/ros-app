@@ -35,13 +35,21 @@ public class RpyView extends ViewGroup {
     private int bgHeight,bgWidth;
     private double pitch;
     private double roll;
-    private double yam;
+    private double yaw;
+
+    private double destPitch=0;
+    private double destRoll=0;
+    private double destYaw;
+    private Vector3 dest;
+    private static final Paint destPaint=new Paint();
+    private static final Paint destTextPaint=new Paint();
+
     private RealMatrix matrix;
     private double sx;
     private double sy;
     private double sz;
     private Vector3[] boatVectors;
-    private int[][] lines=new int[][]{{0,1},{0,3},{0,4},{1,2},{1,5},{2,3},{2,6},{3,7},{4,5},{4,7},{5,6},{6,7}};
+    private int[][] lines=new int[][]{{0,1},{0,3},{1,2},{2,3}/*,{0,2},{1,3},{0,7},{3,4},{0,5},{1,4}*//*,{8,9},{8,10},{8,11}*/};
 
     /*private RealMatrix matrixX;
     private RealMatrix matrixY;
@@ -65,13 +73,19 @@ public class RpyView extends ViewGroup {
 
     private void init(){
         boatPaint.setColor((getResources().getColor(R.color.ok_green)));
-        textPaint.setColor((getResources().getColor(R.color.delete_red)));
+        textPaint.setColor((getResources().getColor(R.color.ok_green)));
         boatPaint.setStrokeWidth(5);
         textPaint.setStrokeWidth(100);
+        textPaint.setTextSize(30);
+        destPaint.setStrokeWidth(10);
+        destTextPaint.setColor((getResources().getColor(R.color.delete_red)));
+        destPaint.setColor((getResources().getColor(R.color.delete_red)));
+        destTextPaint.setStrokeWidth(10);
+        destTextPaint.setTextSize(30);
         matrix=MatrixUtils.createRealDiagonalMatrix(new double[]{1.0,1.0,1.0,1.0});
         pitch=0;
         roll=0;
-        yam=0;
+        yaw=0;
         sx=1;
         sz=1;
         sy=1;
@@ -83,7 +97,17 @@ public class RpyView extends ViewGroup {
         geometry_msgs.Vector3 vector3=(geometry_msgs.Vector3)message;
         roll=vector3.getX();
         pitch=vector3.getY();
-        yam=vector3.getZ();
+        yaw=vector3.getZ();
+        this.invalidate();
+    }
+    public void onNewMessage(double destYaw){
+        this.destYaw=destYaw;
+        this.invalidate();
+    }
+    public void onNewMessage(double[] value){
+        yaw=value[0];
+        pitch=value[1];
+        roll=value[2];
         this.invalidate();
     }
     @Override
@@ -96,26 +120,48 @@ public class RpyView extends ViewGroup {
         int y0=bgHeight/2;
         boatVectors=initBoatPoints(bgWidth,bgHeight);
         RealMatrix scaleMatrix = getScaleMatrix(1, 1, 1, matrix);
-        RealMatrix rotateMatrix = getRotateMatrix(pitch, roll, yam, scaleMatrix);
+        RealMatrix rotateMatrix = getRotateMatrix(pitch, roll, yaw, scaleMatrix);
         Point2[] point2s=new Point2[boatVectors.length];
         for(int i=0;i<boatVectors.length;i++){
             boatVectors[i]=Vector3MultiplyMatrix(boatVectors[i],rotateMatrix);
             point2s[i]=perProject(boatVectors[i],x0,y0,bgWidth,bgHeight);
         }
 
+        RealMatrix destScaleMatrix=getScaleMatrix(1,1,1,MatrixUtils.createRealDiagonalMatrix(new double[]{1.0,1.0,1.0,1.0}));
+        RealMatrix destRotateMatrix=getRotateMatrix(destPitch,destRoll,destYaw,destScaleMatrix);
+        dest=Vector3MultiplyMatrix(dest,destRotateMatrix);
+        Point2 destPoint=perProject(dest,x0,y0,bgWidth,bgHeight);
+        canvas.drawCircle((float) destPoint.x,(float)destPoint.y,10,destPaint);
+
+        Vector3 originPoint=new Vector3(0,0,0);
+        Point2 point2=perProject(originPoint,x0,y0,bgWidth,bgHeight);
+        canvas.drawCircle((float) point2.x,(float) point2.y,10,boatPaint);
+
+        canvas.drawText("destYaw:"+String.format("%.2f",destYaw),bgWidth-240,bgHeight/2,destTextPaint);
+
         for (int[] line : lines) {
             canvas.drawLine((float) point2s[line[0]].x,(float) point2s[line[0]].y,(float) point2s[line[1]].x,(float) point2s[line[1]].y,boatPaint);
             //drawLine(point2s[line[0]],point2s[line[1]],canvas);
         }
-        for (int i = 0; i < point2s.length/2; i++) {
+        for (int i = 0; i < point2s.length; i++) {
             canvas.drawText((char)(i+'A')+"",(float) point2s[i].x,(float)point2s[i].y,textPaint);
         }
+        /*canvas.drawText("O",(float) point2s[8].x,(float) point2s[8].y,textPaint);
+        canvas.drawText("X",(float) point2s[9].x,(float) point2s[9].y,textPaint);
+        canvas.drawText("Y",(float) point2s[10].x,(float) point2s[10].y,textPaint);
+        canvas.drawText("Z",(float) point2s[11].x,(float) point2s[11].y,textPaint);*/
+
+        //textPaint.setTextSize(30);
+        canvas.drawText("yaw:"+String.format("%.2f",yaw),20,bgHeight/2-30,textPaint);
+        canvas.drawText("ptich:"+String.format("%.2f",pitch),20,bgHeight/2,textPaint);
+        canvas.drawText("roll:"+String.format("%.2f",roll),20,bgHeight/2+30,textPaint);
+
     }
 
-    private RealMatrix getRotateMatrix(double pitch,double roll,double yam,RealMatrix matrix){
-        double ax=(Math.PI*pitch)/180.0;
-        double ay=(Math.PI*yam)/180.0;
-        double az=(Math.PI*roll)/180;
+    private RealMatrix getRotateMatrix(double pitch,double roll,double yaw,RealMatrix matrix){
+        double ax=(Math.PI*roll)/180.0;
+        double ay=(Math.PI*pitch)/180.0;
+        double az=(Math.PI*yaw)/180;
         double[][] matX=new double[4][4];
         matX[0][0]=1;matX[1][1]=Math.cos(ax);matX[1][2]=-Math.sin(ax);matX[2][1]=Math.sin(ax);matX[2][2]=Math.cos(ax);matX[3][3]=1;
         double[][] matY=new double[4][4];
@@ -171,15 +217,20 @@ public class RpyView extends ViewGroup {
     private Vector3[] initBoatPoints(int width,int height){
         int min=Math.min(width, height)/2;
         double scale=0.25;
-        Vector3[] vector3=new Vector3[8];
-        vector3[0]=new Vector3(0,0,min*scale*2);
-        vector3[1]=new Vector3(0,0,min*scale*2);
-        vector3[2]=new Vector3(0,0,min*scale*2);
-        vector3[3]=new Vector3(0,0,min*scale*2);
-        vector3[4]=new Vector3(-min*scale*2,-min*scale*2,-min*scale*2);
-        vector3[5]=new Vector3(-min*scale*2,min*scale*2,-min*scale*2);
-        vector3[6]=new Vector3(min*scale*2,min*scale*2,-min*scale*2);
-        vector3[7]=new Vector3(min*scale*2,-min*scale*2,-min*scale*2);
+        Vector3[] vector3=new Vector3[4];
+        vector3[0]=new Vector3(min*scale,0,0);
+        vector3[1]=new Vector3(-min*scale,min*scale,0);
+        vector3[2]=new Vector3(-min*scale*0.4,0,0);
+        vector3[3]=new Vector3(-min*scale,-min*scale,0);
+        dest=new Vector3(min*scale *1.5,0,0);
+        /*vector3[4]=new Vector3(min*scale*2,min*scale*2,-min*scale*2);
+        vector3[5]=new Vector3(min*scale*2,-min*scale*2,-min*scale*2);
+        vector3[6]=new Vector3(-min*scale*2,-min*scale*2,-min*scale*2);
+        vector3[7]=new Vector3(-min*scale*2,min*scale*2,-min*scale*2);
+        vector3[8]=new Vector3(0,0,0);
+        vector3[9]=new Vector3(min*scale*4,0,0);
+        vector3[10]=new Vector3(0,min*scale*4,0);
+        vector3[11]=new Vector3(0,0,min*scale*4);*/
         return vector3;
     }
 

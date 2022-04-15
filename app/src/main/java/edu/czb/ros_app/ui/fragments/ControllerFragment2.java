@@ -1,5 +1,7 @@
 package edu.czb.ros_app.ui.fragments;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -7,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,9 +20,12 @@ import androidx.navigation.Navigation;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.Objects;
+
 import edu.czb.ros_app.R;
 import edu.czb.ros_app.viewmodel.ControllerViewModel;
 import edu.czb.ros_app.widgets.joystick.JoystickView;
+import edu.czb.ros_app.widgets.joystick.JoystickView1;
 import edu.czb.ros_app.widgets.joystick.JoystickView2;
 
 /**
@@ -33,7 +39,7 @@ import edu.czb.ros_app.widgets.joystick.JoystickView2;
  */
 public class ControllerFragment2 extends Fragment {
     private static final String TAG = ControllerFragment.class.getSimpleName();
-    private JoystickView joystickView;
+    private JoystickView1 joystickView;
     private JoystickView2 joystickView2;
     private ControllerViewModel controllerViewModel;
     private FloatingActionButton floatingActionButton;
@@ -80,10 +86,28 @@ public class ControllerFragment2 extends Fragment {
             controller.navigate(R.id.action_to_controller);
         });
         joystickView.getJoystickLiveData().observe(getViewLifecycleOwner(),joystickData -> {
+            if(joystickView2.down){
+            float[] axes= Objects.requireNonNull(joystickView2.getJoystickLiveData().getValue()).axes;
+            for (int i = 0; i < 2; i++) {
+                joystickData.axes[i]+=axes[i];
+                Objects.requireNonNull(joystickView2.getJoystickLiveData().getValue()).axes=new float[6];
+            }}else{
+                Objects.requireNonNull(joystickView2.getJoystickLiveData().getValue()).axes=new float[6];
+            }
             controllerViewModel.getRosDomain().publicData(joystickData);
         });
         joystickView2.getJoystickLiveData().observe(getViewLifecycleOwner(),joystickData -> {
+            if(joystickView.down){
+                float[] axes= Objects.requireNonNull(joystickView.getJoystickLiveData().getValue()).axes;
+                for (int i = 2; i < 4; i++) {
+                    joystickData.axes[i]+=axes[i];
+                }
+                Objects.requireNonNull(joystickView.getJoystickLiveData().getValue()).axes=new float[6];
+            }else{
+                Objects.requireNonNull(joystickView.getJoystickLiveData().getValue()).axes=new float[6];
+            }
             controllerViewModel.getRosDomain().publicData(joystickData);
+
         });
 
 
@@ -92,6 +116,8 @@ public class ControllerFragment2 extends Fragment {
     public void onDestroyView(){
         super.onDestroyView();
     }
+
+
 
 
 }
