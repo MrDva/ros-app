@@ -35,12 +35,14 @@ public class BatteryView extends ViewGroup {
     private double charge;
     private double capacity;
     private double voltage;
+    private double temperature;
 
 
 
     Paint outerPaint;
     Paint innerPaint;
     Paint textPaint;
+    Paint textValPaint;
     Paint bgPaint;
     private Paint highlightPaint;
     int level;
@@ -90,6 +92,11 @@ public class BatteryView extends ViewGroup {
         textPaint.setTextAlign(Paint.Align.CENTER);
         textPaint.setTextSize(textSize);
 
+        textValPaint = new Paint();
+        textValPaint.setColor(getResources().getColor(R.color.colorAccent));
+        textValPaint.setTextAlign(Paint.Align.CENTER);
+        textValPaint.setTextSize(textSize);
+
         bgPaint = new Paint();
         bgPaint.setColor(getResources().getColor(R.color.white));
         this.setWillNotDraw(false);
@@ -107,7 +114,8 @@ public class BatteryView extends ViewGroup {
         charge=state.getCharge();
         voltage=state.getVoltage();
         capacity=state.getCapacity();
-        this.updatePercentage((float) ((200-capacity)/200.0));
+        temperature=state.getPercentage();
+        this.updatePercentage((float) ((200-charge)/200.0));
         this.invalidate();
     }
     private void updatePercentage(float value) {
@@ -137,7 +145,7 @@ public class BatteryView extends ViewGroup {
         else if (level == 4)    color = R.color.battery4;
         else if (level == 5)    color = R.color.battery5;
         else                    color = R.color.colorPrimary;
-
+        textValPaint.setColor(getResources().getColor(color));
         innerPaint.setColor(getResources().getColor(color));
     }
 
@@ -155,14 +163,14 @@ public class BatteryView extends ViewGroup {
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.drawRect(0, 0, getWidth(), getHeight(), highlightPaint);
-        float width = getWidth();
+        float width = getWidth()/(float)1.5;
         float height = getHeight();
         float middleX = width/2;
 
         float left = borderWidth/2;
         float right = width - borderWidth/2;
         float top = borderWidth * 2;
-        float bottom = height - borderWidth - textSize*5;
+        float bottom = height - borderWidth;
 
         canvas.drawRect(0,0,getWidth(),getHeight(),bgPaint);
 
@@ -214,18 +222,23 @@ public class BatteryView extends ViewGroup {
         }
 
         // Draw status text
-        canvas.drawText("电流:"+String.format("%.2f", current)+"A", middleX, height-textSize*4, textPaint);
-        canvas.drawText("电压:"+String.format("%.2f",voltage)+"V", middleX, height-textSize*3, textPaint);
-        canvas.drawText("功率:"+String.format("%.2f",capacity)+"W", middleX, height-textSize*2, textPaint);
-        canvas.drawText("消耗电量:"+String.format("%.2f",charge)+"Wh", middleX, height-textSize, textPaint);
-
+        canvas.drawText("电流:", width*(float) 1.2, textSize, textPaint);
+        canvas.drawText("电压:", width*(float) 1.2, textSize*3, textPaint);
+        canvas.drawText("功率:", width*(float) 1.2, textSize*5, textPaint);
+        canvas.drawText("消耗电量:", width*(float) 1.2, textSize*7, textPaint);
+        canvas.drawText("温度:" ,width*(float) 1.2,textSize*9,textPaint);
+        canvas.drawText(String.format("%.2f", current)+"A", width*(float) 1.2, textSize*2, textValPaint);
+        canvas.drawText(String.format("%.2f",voltage)+"V", width*(float) 1.2, textSize*4, textValPaint);
+        canvas.drawText(String.format("%.2f",capacity)+"W", width*(float) 1.2, textSize*6, textValPaint);
+        canvas.drawText(String.format("%.2f",charge)+"Wh", width*(float) 1.2, textSize*8, textValPaint);
+        canvas.drawText(String.format("%.2f",temperature)+"℃",width*(float) 1.2,textSize*10,textValPaint);
     }
 
-   /* @Override
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        *//**
-         * 获得此ViewGroup上级容器为其推荐的宽和高，以及计算模式
-         *//*
+        /**
+         * 获得此ViewGroup上级容器为其推荐的宽和高，以及计算模式*/
+
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int sizeWidth = MeasureSpec.getSize(widthMeasureSpec);
@@ -234,9 +247,9 @@ public class BatteryView extends ViewGroup {
 
         // 计算出所有的childView的宽和高，调用后，它所有的childView的宽和高的值就被确定，也即getMeasuredWidth（）有值了。
         measureChildren(widthMeasureSpec, heightMeasureSpec);
-        *//**
-         * 记录如果是wrap_content是设置的宽和高
-         *//*
+        /**
+         * 记录如果是wrap_content是设置的宽和高*/
+
         int width = 0;
         int height = 0;
 
@@ -256,9 +269,9 @@ public class BatteryView extends ViewGroup {
         // 用于计算下面两个childiew的宽度，最终宽度取二者之间大值
         int bWidth = 0;
 
-        *//**
-         * 根据childView计算的出的宽和高，以及设置的margin计算容器的宽和高，主要用于容器是warp_content时
-         *//*
+        /**
+         * 根据childView计算的出的宽和高，以及设置的margin计算容器的宽和高，主要用于容器是warp_content时*/
+
         for (int i = 0; i < cCount; i++)
         {
             View childView = getChildAt(i);
@@ -292,12 +305,12 @@ public class BatteryView extends ViewGroup {
         width = Math.max(tWidth, bWidth);
         height = Math.max(lHeight, rHeight);
 
-        *//**
+        /**
          * 如果是wrap_content设置为我们计算的值
-         * 否则：直接设置为父容器计算的值
-         *//*
+         * 否则：直接设置为父容器计算的值*/
+
         setMeasuredDimension((widthMode == MeasureSpec.EXACTLY) ? sizeWidth
                 : width, (heightMode == MeasureSpec.EXACTLY) ? sizeHeight
                 : height);
-    }*/
+    }
 }

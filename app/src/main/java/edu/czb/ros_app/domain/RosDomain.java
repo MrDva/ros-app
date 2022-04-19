@@ -24,6 +24,8 @@ import edu.czb.ros_app.model.rosRepositories.RosRepository;
 import edu.czb.ros_app.model.rosRepositories.message.BaseData;
 import edu.czb.ros_app.model.rosRepositories.message.RosData;
 import edu.czb.ros_app.model.rosRepositories.message.Topic;
+import edu.czb.ros_app.model.rosRepositories.node.AbstractNode;
+import edu.czb.ros_app.model.rosRepositories.node.SubscriberNode;
 
 /**
  * @ProjectName: ros-app
@@ -122,6 +124,22 @@ public class RosDomain {
 
     public void publicData(BaseData baseData){
         rosRepository.publishData(baseData);
+    }
+
+    public List<Topic> getCurrentTopic(){
+        return rosRepository.getCurrentTopic();
+    }
+
+    public void additionNode(Topic topic){
+        rosRepository.additionNode(topic);
+    }
+
+    public void registerAllAdditionNodes(){
+        rosRepository.registerAllAdditionNodes();
+    }
+
+    public void unregisterAllAdditionNodes(){
+        rosRepository.unregisterAllAdditionNodes();
     }
 
 }

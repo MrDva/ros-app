@@ -43,6 +43,7 @@ public class RpyView extends ViewGroup {
     private Vector3 dest;
     private static final Paint destPaint=new Paint();
     private static final Paint destTextPaint=new Paint();
+    private static final Paint paint=new Paint();
 
     private RealMatrix matrix;
     private double sx;
@@ -82,6 +83,10 @@ public class RpyView extends ViewGroup {
         destPaint.setColor((getResources().getColor(R.color.delete_red)));
         destTextPaint.setStrokeWidth(10);
         destTextPaint.setTextSize(30);
+        paint.setStrokeWidth(5);
+        paint.setTextSize(40);
+        paint.setColor((getResources()).getColor(R.color.colorAccent));
+
         matrix=MatrixUtils.createRealDiagonalMatrix(new double[]{1.0,1.0,1.0,1.0});
         pitch=0;
         roll=0;
@@ -127,17 +132,30 @@ public class RpyView extends ViewGroup {
             point2s[i]=perProject(boatVectors[i],x0,y0,bgWidth,bgHeight);
         }
 
+
+
+
+
+        Vector3 originPoint=new Vector3(0,0,0);
+        Point2 point2=perProject(originPoint,x0,y0,bgWidth,bgHeight);
+
+        canvas.drawCircle((float) point2.x,(float) point2.y,bgHeight/4,paint);
+        canvas.drawText("N",(float) point2.x,(float)(point2.y-bgHeight/4),paint);
+        canvas.drawText("S",(float) point2.x,(float) (point2.y+bgHeight/4+paint.getTextSize()),paint);
+        canvas.drawText("W",(float) (point2.x-bgHeight/4-paint.getTextSize()),(float) point2.y,paint);
+        canvas.drawText("E",(float) (point2.x+bgHeight/4),(float) point2.y,paint);
+
+        canvas.drawCircle((float) point2.x,(float) point2.y,10,boatPaint);
+
+
+        canvas.drawText("destYaw:"+String.format("%.2f",destYaw),bgWidth-240,bgHeight/2,destTextPaint);
+
+
         RealMatrix destScaleMatrix=getScaleMatrix(1,1,1,MatrixUtils.createRealDiagonalMatrix(new double[]{1.0,1.0,1.0,1.0}));
         RealMatrix destRotateMatrix=getRotateMatrix(destPitch,destRoll,destYaw,destScaleMatrix);
         dest=Vector3MultiplyMatrix(dest,destRotateMatrix);
         Point2 destPoint=perProject(dest,x0,y0,bgWidth,bgHeight);
         canvas.drawCircle((float) destPoint.x,(float)destPoint.y,10,destPaint);
-
-        Vector3 originPoint=new Vector3(0,0,0);
-        Point2 point2=perProject(originPoint,x0,y0,bgWidth,bgHeight);
-        canvas.drawCircle((float) point2.x,(float) point2.y,10,boatPaint);
-
-        canvas.drawText("destYaw:"+String.format("%.2f",destYaw),bgWidth-240,bgHeight/2,destTextPaint);
 
         for (int[] line : lines) {
             canvas.drawLine((float) point2s[line[0]].x,(float) point2s[line[0]].y,(float) point2s[line[1]].x,(float) point2s[line[1]].y,boatPaint);

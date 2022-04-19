@@ -5,135 +5,153 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/white"
     android:layout_height="match_parent">
-    <LinearLayout
+    <!--<ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical">-->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="top"
-            android:orientation="horizontal"
-            android:layout_weight="0.5">
-            <edu.czb.ros_app.widgets.battey.BatteryView
-                android:id="@+id/battery_view"
-                android:background="@color/white"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="0.5"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="20dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp">
-
-            </edu.czb.ros_app.widgets.battey.BatteryView>
-            <edu.czb.ros_app.widgets.temperature.TemperatureView
-                android:id="@+id/temperature_view"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="0.5"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="20dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp">
-
-            </edu.czb.ros_app.widgets.temperature.TemperatureView>
-        </LinearLayout>
-        <!--<LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="top"
-            android:layout_weight="0.5"
             android:orientation="vertical">
-            &lt;!&ndash;<edu.czb.ros_app.widgets.imu.ImuAccView
-                android:id="@+id/imu_acc_view"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="0.5"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="20dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp">
-
-            </edu.czb.ros_app.widgets.imu.ImuAccView>&ndash;&gt;
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-                <Button
-                    android:id="@+id/button_yaw_up"
-                    android:text="yaw_up"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:gravity="top"
+                android:orientation="horizontal"
+                android:layout_weight="1">
+                <edu.czb.ros_app.widgets.battey.BatteryView
+                    android:id="@+id/battery_view"
+                    android:background="@color/white"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-                <Button
-                    android:id="@+id/button_yaw_down"
-                    android:text="yaw_down"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp">
+
+                </edu.czb.ros_app.widgets.battey.BatteryView>
+                <!--<edu.czb.ros_app.widgets.temperature.TemperatureView
+                    android:id="@+id/temperature_view"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp">
+
+                </edu.czb.ros_app.widgets.temperature.TemperatureView>-->
             </LinearLayout>
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-                <Button
-                    android:id="@+id/button_pitch_up"
-                    android:text="pitch_up"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-                <Button
-                    android:id="@+id/button_pitch_down"
-                    android:text="pitch_down"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-                <Button
-                    android:id="@+id/button_roll_up"
-                    android:text="roll_up"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-                <Button
-                    android:id="@+id/button_roll_down"
-                    android:text="roll_down"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
-
-
-            &lt;!&ndash;<TextView
-                android:id="@+id/rpy_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>&ndash;&gt;
-
-
-        </LinearLayout>-->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="top"
-            android:layout_weight="0.5"
-            android:orientation="horizontal">
-            <!--<edu.czb.ros_app.widgets.imu.ImuAngView
-                android:id="@+id/imu_ang_view"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="0.5"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="20dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp">
-
-            </edu.czb.ros_app.widgets.imu.ImuAngView>-->
-            <edu.czb.ros_app.widgets.imu.RpyView
+            <!--<LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/rpyView">
+                android:gravity="top"
+                android:layout_weight="0.5"
+                android:orientation="vertical">
+                &lt;!&ndash;<edu.czb.ros_app.widgets.imu.ImuAccView
+                    android:id="@+id/imu_acc_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp">
 
-            </edu.czb.ros_app.widgets.imu.RpyView>
+                </edu.czb.ros_app.widgets.imu.ImuAccView>&ndash;&gt;
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <Button
+                        android:id="@+id/button_yaw_up"
+                        android:text="yaw_up"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <Button
+                        android:id="@+id/button_yaw_down"
+                        android:text="yaw_down"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <Button
+                        android:id="@+id/button_pitch_up"
+                        android:text="pitch_up"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <Button
+                        android:id="@+id/button_pitch_down"
+                        android:text="pitch_down"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <Button
+                        android:id="@+id/button_roll_up"
+                        android:text="roll_up"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <Button
+                        android:id="@+id/button_roll_down"
+                        android:text="roll_down"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
 
 
+                &lt;!&ndash;<TextView
+                    android:id="@+id/rpy_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>&ndash;&gt;
+
+
+            </LinearLayout>-->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+                <edu.czb.ros_app.widgets.imu.MiCompass
+                    android:id="@+id/micopass_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
+            <!--<LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:gravity="top"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+                &lt;!&ndash;<edu.czb.ros_app.widgets.imu.ImuAngView
+                    android:id="@+id/imu_ang_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp">
+
+                </edu.czb.ros_app.widgets.imu.ImuAngView>&ndash;&gt;
+
+                <edu.czb.ros_app.widgets.imu.RpyView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/rpyView">
+
+                </edu.czb.ros_app.widgets.imu.RpyView>
+
+
+            </LinearLayout>-->
         </LinearLayout>
-    </LinearLayout>
+    <!--</ScrollView>-->
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/switch_history"

@@ -87,6 +87,7 @@ public class NetWorkUtil {
             }
         } catch (SocketException ignored) {
         }
+        ipAddresses.add("android");
         return ipAddresses;
     }
 

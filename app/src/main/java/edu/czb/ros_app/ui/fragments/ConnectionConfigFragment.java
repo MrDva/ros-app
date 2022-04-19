@@ -234,9 +234,9 @@ public class ConnectionConfigFragment extends Fragment implements TextView.OnEdi
                         saveTopic(TopicName.BATTERY,getTopicName(topicNameSettingDialog.text_battery,TopicName.BATTERY));
                         saveTopic(TopicName.MAP,getTopicName(topicNameSettingDialog.text_map,TopicName.MAP));
                         saveTopic(TopicName.MAP_PATH,getTopicName(topicNameSettingDialog.text_map_path,TopicName.MAP_PATH));
-                        saveTopic(TopicName.IMU,getTopicName(topicNameSettingDialog.text_imu,TopicName.IMU));
+                        //saveTopic(TopicName.IMU,getTopicName(topicNameSettingDialog.text_imu,TopicName.IMU));
                         saveTopic(TopicName.JOY,getTopicName(topicNameSettingDialog.text_joy,TopicName.JOY));
-                        saveTopic(TopicName.TEMPERATURE,getTopicName(topicNameSettingDialog.text_temp,TopicName.TEMPERATURE));
+                        //saveTopic(TopicName.TEMPERATURE,getTopicName(topicNameSettingDialog.text_temp,TopicName.TEMPERATURE));
                         saveTopic(TopicName.RPY,getTopicName(topicNameSettingDialog.text_rpy,TopicName.RPY));
                         if(getContext().getString(R.string.connected).equals(binding.statusText.getText().toString())){
                             connectViewModel.getRosDomain().unregisterAllNodes();

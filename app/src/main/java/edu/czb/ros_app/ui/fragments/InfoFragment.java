@@ -32,6 +32,7 @@ import edu.czb.ros_app.viewmodel.InfoViewModel;
 import edu.czb.ros_app.widgets.battey.BatteryView;
 import edu.czb.ros_app.widgets.imu.ImuAccView;
 import edu.czb.ros_app.widgets.imu.ImuAngView;
+import edu.czb.ros_app.widgets.imu.MiCompass;
 import edu.czb.ros_app.widgets.imu.RpyView;
 import edu.czb.ros_app.widgets.map.MapInfoVIew;
 import edu.czb.ros_app.widgets.temperature.TemperatureView;
@@ -45,6 +46,7 @@ public class InfoFragment extends Fragment {
     private BatteryView batteryView;
     private ImuAccView imuAccView;
     private RpyView rpyView;
+    private MiCompass miCompass;
     private TemperatureView temperatureView;
     private MapInfoVIew mapInfoVIew;
 
@@ -101,9 +103,10 @@ public class InfoFragment extends Fragment {
         viewModel=new ViewModelProvider(requireActivity()).get(InfoViewModel.class);
         viewModel.setViewLifecycleOwner(getViewLifecycleOwner());
         batteryView=getView().findViewById(R.id.battery_view);
-        temperatureView=getView().findViewById(R.id.temperature_view);
+        //temperatureView=getView().findViewById(R.id.temperature_view);
+        miCompass=getView().findViewById(R.id.micopass_view);
         //imuAccView=getView().findViewById(R.id.imu_acc_view);
-        rpyView=getView().findViewById(R.id.rpyView);
+        //rpyView=getView().findViewById(R.id.rpyView);
 
         bntToChart=getView().findViewById(R.id.switch_history);
         bntToChart.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#8881D4FA")));
@@ -114,18 +117,19 @@ public class InfoFragment extends Fragment {
             SharedPreferences sharedPreferences = getContext().getSharedPreferences(TopicName.TOPIC_KEY, Context.MODE_PRIVATE);
             if(rosData.getTopic().name.equals(sharedPreferences.getString(TopicName.BATTERY,TopicName.BATTERY))){
                 batteryView.onNewMessage((rosData.getMessage()));
-                temperatureView.onNewMessage(rosData.getMessage());
             }else if(rosData.getTopic().name.equals(sharedPreferences.getString(TopicName.DEST_YAW,TopicName.DEST_YAW))){
                 Float64 destYaw=(Float64)rosData.getMessage();
-                rpyView.onNewMessage(destYaw.getData());
+                miCompass.setDestVal((float) destYaw.getData());
+                //rpyView.onNewMessage(destYaw.getData());
             }/*else if(rosData.getTopic().name.equals(sharedPreferences.getString(TopicName.BATTERY,TopicName.BATTERY)){
                 //mapInfoVIew.onNewMessage(rosData.getMessage());
             }*/else if(rosData.getTopic().name.toLowerCase().contains(sharedPreferences.getString(TopicName.TEMPERATURE,TopicName.TEMPERATURE))){
-                temperatureView.onNewMessage(rosData.getMessage());
+                //temperatureView.onNewMessage(rosData.getMessage());
             }/*else if(rosData.getTopic().name.contains("Float32")){
                 //binding.other.setText(rosData.getTopic().name+":"+((Float32)rosData.getMessage()).getData());
             }*/else if(rosData.getTopic().name.contains(sharedPreferences.getString(TopicName.RPY,TopicName.RPY))){
-                rpyView.onNewMessage(rosData.getMessage());
+                //rpyView.onNewMessage(rosData.getMessage());
+                miCompass.onNewData(rosData.getMessage());
             }
         });
 

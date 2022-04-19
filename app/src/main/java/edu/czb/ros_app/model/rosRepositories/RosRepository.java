@@ -82,12 +82,16 @@ public class RosRepository implements MessageListener<RosData> {
     private final MutableLiveData<RosData> receivedData;
     private final MutableLiveData<RosData> receivedMapData;
     private final HashMap<Topic, AbstractNode> currentNodes;
+    private final HashMap<Topic,AbstractNode> currentPublishNodes;
+    private final HashMap<Topic,AbstractNode> additionNodes;
     private NodeConfiguration nodeConfiguration;
     public final DataStorage dataStorage;
     //private FrameTransformTree frameTransformTree;
     public RosRepository(Context context){
         this.contextReference=new WeakReference<>(context);
         this.currentNodes = new HashMap<>();
+        this.additionNodes=new HashMap<>();
+        this.currentPublishNodes=new HashMap<>();
         this.rosConnected = new MutableLiveData<>(ConnectionStateType.DISCONNECTED);
         this.receivedData = new MutableLiveData<>();
         this.receivedMapData=new MutableLiveData<>();
@@ -95,6 +99,25 @@ public class RosRepository implements MessageListener<RosData> {
         this.dataStorage=DataStorage.getInstance(context);
        // this.frameTransformTree = TransformProvider.getInstance().getTree();
         this.initStaticNodes();
+    }
+
+    public void additionNode(Topic topic){
+        SubscriberNode node=new SubscriberNode(this);
+        node.setTopic(topic);
+        additionNodes.put(topic,node);
+    }
+
+    public void registerAllAdditionNodes(){
+        for (AbstractNode node: additionNodes.values()) {
+            this.registerNode(node);
+        }
+    }
+
+    public void unregisterAllAdditionNodes(){
+        for(AbstractNode node:additionNodes.values()){
+            this.unregisterNode(node);
+        }
+        additionNodes.clear();
     }
 
     @Override
@@ -142,7 +165,7 @@ public class RosRepository implements MessageListener<RosData> {
      * @param data Widget data that has changed
      */
     public void publishData(BaseData data) {
-        AbstractNode node = currentNodes.get(data.getTopic());
+        AbstractNode node = currentPublishNodes.get(data.getTopic());
         //Log.i(TAG,"topic:"+data.getTopic().name);
         if(node instanceof PublisherNode) {
             ((PublisherNode)node).setData(data);
@@ -211,6 +234,9 @@ public class RosRepository implements MessageListener<RosData> {
         for (AbstractNode node: currentNodes.values()) {
             this.registerNode(node);
         }
+        for(AbstractNode node: currentPublishNodes.values()){
+            this.registerNode(node);
+        }
     }
 
     public void clearAllNodes(){
@@ -219,6 +245,9 @@ public class RosRepository implements MessageListener<RosData> {
 
     public void unregisterAllNodes() {
         for (AbstractNode node: currentNodes.values()) {
+            this.unregisterNode(node);
+        }
+        for(AbstractNode node: currentPublishNodes.values()){
             this.unregisterNode(node);
         }
     }
@@ -297,16 +326,20 @@ public class RosRepository implements MessageListener<RosData> {
         if(nodeMainExecutorService==null){
             return topicList;
         }
-        MasterClient masterClient=new MasterClient(nodeMainExecutorService.getMasterUri());
-        GraphName graphName=GraphName.newAnonymous();
-        Response<List<TopicType>>responseList=masterClient.getTopicTypes(graphName);
-        for(TopicType topicType:responseList.getResult()){
-            String name=topicType.getName();
-            String type=topicType.getMessageType();
-            if(type.contains("gazebo_msgs")){
-                continue;
+        try {
+            MasterClient masterClient=new MasterClient(nodeMainExecutorService.getMasterUri());
+            GraphName graphName=GraphName.newAnonymous();
+            Response<List<TopicType>>responseList=masterClient.getTopicTypes(graphName);
+            for(TopicType topicType:responseList.getResult()){
+                String name=topicType.getName();
+                String type=topicType.getMessageType();
+                if(type.contains("gazebo_msgs")){
+                    continue;
+                }
+                topicList.add(new Topic(name,type));
             }
-            topicList.add(new Topic(name,type));
+        }catch (Exception e){
+
         }
         return topicList;
 
@@ -379,7 +412,7 @@ public class RosRepository implements MessageListener<RosData> {
      */
     public void initStaticNodes() {
         Log.i(TAG,"initStaticNodes");
-        Topic tfTopic = new Topic("/tf", TFMessage._TYPE);
+        /*Topic tfTopic = new Topic("/tf", TFMessage._TYPE);
         SubscriberNode tfNode = new SubscriberNode(this);
         tfNode.setTopic(tfTopic);
         currentNodes.put(tfTopic, tfNode);
@@ -387,7 +420,7 @@ public class RosRepository implements MessageListener<RosData> {
         Topic tfStaticTopic = new Topic("/tf_static", TFMessage._TYPE);
         SubscriberNode tfStaticNode = new SubscriberNode(this);
         tfStaticNode.setTopic(tfStaticTopic);
-        currentNodes.put(tfStaticTopic, tfStaticNode);
+        currentNodes.put(tfStaticTopic, tfStaticNode);*/
 
         BatteryEntity batteryEntity=new BatteryEntity(getTopicName(TopicName.BATTERY));
         SubscriberNode node=new SubscriberNode(this);
@@ -399,15 +432,15 @@ public class RosRepository implements MessageListener<RosData> {
         node.setTopic(mapEntity.getTopic());
         currentNodes.put(mapEntity.getTopic(),node);
 
-        TemperatureEntity temperatureEntity=new TemperatureEntity(getTopicName(TopicName.TEMPERATURE));
+        /*TemperatureEntity temperatureEntity=new TemperatureEntity(getTopicName(TopicName.TEMPERATURE));
         node=new SubscriberNode(this);
         node.setTopic(temperatureEntity.getTopic());
-        currentNodes.put(temperatureEntity.getTopic(),node);
+        currentNodes.put(temperatureEntity.getTopic(),node);*/
 
-        ImuEntity imuEntity=new ImuEntity(getTopicName(TopicName.IMU));
+        /*ImuEntity imuEntity=new ImuEntity(getTopicName(TopicName.IMU));
         node=new SubscriberNode(this);
         node.setTopic(imuEntity.getTopic());
-        currentNodes.put(imuEntity.getTopic(),node);
+        currentNodes.put(imuEntity.getTopic(),node);*/
 
         RpyEntity rpyEntity=new RpyEntity(getTopicName(TopicName.RPY));
         node=new SubscriberNode(this);
@@ -422,18 +455,22 @@ public class RosRepository implements MessageListener<RosData> {
         JoystickEntity  joystickEntity=new JoystickEntity(getTopicName(TopicName.JOY));
         PublisherNode publisherNode=new PublisherNode();
         publisherNode.setTopic(joystickEntity.getTopic());
-        currentNodes.put(joystickEntity.getTopic(),publisherNode);
+        currentPublishNodes.put(joystickEntity.getTopic(),publisherNode);
 
         MapPathEntity mapPathEntity=new MapPathEntity(getTopicName(TopicName.MAP_PATH));
         publisherNode=new PublisherNode();
         publisherNode.setTopic(mapPathEntity.getTopic());
-        currentNodes.put(mapPathEntity.getTopic(),publisherNode);
+        currentPublishNodes.put(mapPathEntity.getTopic(),publisherNode);
 
     }
 
     private String getTopicName(String TopicNameKey){
         SharedPreferences topicInfo=context.getSharedPreferences(TopicName.TOPIC_KEY,Context.MODE_PRIVATE);
         return topicInfo.getString(TopicNameKey,TopicNameKey);
+    }
+
+    public List<Topic> getCurrentTopic(){
+        return new ArrayList<>(currentNodes.keySet());
     }
 
 }
