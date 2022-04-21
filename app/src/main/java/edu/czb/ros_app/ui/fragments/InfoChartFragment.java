@@ -1,19 +1,24 @@
 package edu.czb.ros_app.ui.fragments;
 
+import android.Manifest;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -36,6 +41,7 @@ import edu.czb.ros_app.model.db.DataStorage;
 import edu.czb.ros_app.model.entities.info.BatteryStateEntity;
 import edu.czb.ros_app.model.entities.info.RpyDataEntity;
 import edu.czb.ros_app.model.entities.info.TempDataEntity;
+import edu.czb.ros_app.utils.FileUtil;
 import edu.czb.ros_app.viewmodel.ControllerViewModel;
 
 /**
@@ -125,6 +131,7 @@ public class InfoChartFragment extends Fragment {
         tempDescription.setText("温度");
         tempChart.setDescription(tempDescription);
 
+        checkPermission();
         batteryDialog=new AlertDialog.Builder(getContext())
                 .setTitle("请选择要对电池相关数据进行的操作")
                 /*.setNeutralButton("刷新",new DialogInterface.OnClickListener(){
@@ -133,6 +140,27 @@ public class InfoChartFragment extends Fragment {
                         batteryData=dataStorage.getBatteryLimitList(LIMIT);
                     }
                 })*/
+                .setNeutralButton("导出数据", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //开启一个子线程
+                        List<BatteryStateEntity> allBattery = dataStorage.getAllBattery();
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                //dismissLoad();
+                                try {
+                                    FileUtil.writeBatteryExcel(allBattery);
+                                    Toast.makeText(getContext(), "导出成功:/storage/emulated/0/Download/", Toast.LENGTH_LONG).show();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    Toast.makeText(getContext(), "导出失败", Toast.LENGTH_SHORT).show();
+                                }
+
+                            }
+                        });
+                    }
+                })
                 .setPositiveButton("删除数据", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -154,6 +182,28 @@ public class InfoChartFragment extends Fragment {
                         batteryData=dataStorage.getBatteryLimitList(LIMIT);
                     }
                 })*/
+                .setNeutralButton("导出数据", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //开启一个子线程
+                        List<RpyDataEntity> allRpy = dataStorage.getAllRpy();
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                //dismissLoad();
+                                try {
+                                    FileUtil.writeRpyExcel(allRpy);
+                                    Toast.makeText(getContext(), "导出成功:/storage/emulated/0/Download/", Toast.LENGTH_LONG).show();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    Toast.makeText(getContext(), "导出失败", Toast.LENGTH_SHORT).show();
+                                }
+
+                            }
+                        });
+
+                    }
+                })
                 .setPositiveButton("删除数据", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -175,6 +225,28 @@ public class InfoChartFragment extends Fragment {
                         batteryData=dataStorage.getBatteryLimitList(LIMIT);
                     }
                 })*/
+                .setNeutralButton("导出数据", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        //开启一个子线程
+                        List<TempDataEntity> allTemp = dataStorage.getAllTemp();
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                //dismissLoad();
+                                try {
+                                    FileUtil.writeTempExcel(allTemp);
+                                    Toast.makeText(getContext(), "导出成功:/storage/emulated/0/Download/", Toast.LENGTH_LONG).show();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    Toast.makeText(getContext(), "导出失败", Toast.LENGTH_SHORT).show();
+                                }
+
+                            }
+                        });
+                    }
+                })
                 .setPositiveButton("删除数据", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -314,6 +386,21 @@ public class InfoChartFragment extends Fragment {
         List<ILineDataSet> dataSets=new ArrayList<>();
         dataSets.add(tempDataSet);
         return dataSets;
+    }
+
+    private static final int REQUEST_CODE = 1;
+    private void checkPermission() {
+        try {
+            String[] PERMISSIONS_STORAGE = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            int permission = ActivityCompat.checkSelfPermission(getContext(), "android.permission.WRITE_EXTERNAL_STORAGE");
+            if (permission != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(getActivity(), PERMISSIONS_STORAGE, REQUEST_CODE);
+            } else {
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

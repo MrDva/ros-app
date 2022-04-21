@@ -36,6 +36,7 @@ public abstract class DataStorage extends RoomDatabase {
             instance = Room.databaseBuilder(context.getApplicationContext(),
                     DataStorage.class, Constants.DB_NAME)
                     .fallbackToDestructiveMigration()
+                    .allowMainThreadQueries()
                     .build();
         }
 
@@ -84,6 +85,10 @@ public abstract class DataStorage extends RoomDatabase {
         return batteryStateDao().getLimitListData(limit);
     }
 
+    public List<BatteryStateEntity> getAllBattery(){
+        return batteryStateDao().getAllData();
+    }
+
     //Rpy methods-------------------------------------------------------------------------------
     public abstract RpyDao RpyDao();
 
@@ -101,6 +106,9 @@ public abstract class DataStorage extends RoomDatabase {
 
     public LiveData<List<RpyDataEntity>> getRpyLimitList(long limit){
         return RpyDao().getLimitListData(limit);
+    }
+    public List<RpyDataEntity> getAllRpy(){
+        return RpyDao().getAllData();
     }
 
     //temperature methods------------------------------------------------------------------
@@ -120,6 +128,10 @@ public abstract class DataStorage extends RoomDatabase {
 
     public LiveData<List<TempDataEntity>> getTempLimitList(long limit){
         return temperatureDao().getLimitListData(limit);
+    }
+
+    public List<TempDataEntity> getAllTemp(){
+        return temperatureDao().getAllData();
     }
 
     // Widget methods ------------------------------------------------------------------------------

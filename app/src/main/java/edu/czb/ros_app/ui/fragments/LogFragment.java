@@ -76,11 +76,14 @@ public class LogFragment extends Fragment {
     private RosDomain rosDomain;
     private MutableLiveData<RosData> rosDate;
     FloatingActionButton buttonEdit;
+    FloatingActionButton buttonRefresh;
     //FloatingActionButton buttonPub;
     List<String> subList=new ArrayList<>();
     //List<String> pubList=new ArrayList<>();
     TextView sub;
     //TextView pub;
+
+    private boolean isPause=false;
 
     List<Topic> topicList;
     List<Topic> currentTopic;
@@ -107,12 +110,24 @@ public class LogFragment extends Fragment {
         //buttonPub=getView().findViewById(R.id.btn_update_pub);
         //buttonSub=getView().findViewById(R.id.btn_update_pub);
         buttonEdit=getView().findViewById(R.id.btn_topic_checked);
+        buttonRefresh=getView().findViewById(R.id.btn_auto_refresh);
         buttonEdit.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#8881D4FA")));
+        buttonRefresh.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#8881D4FA")));
         SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        SharedPreferences sharedPreferences = getContext().getSharedPreferences(TopicName.TOPIC_KEY, Context.MODE_PRIVATE);
+        //SharedPreferences sharedPreferences = getContext().getSharedPreferences(TopicName.TOPIC_KEY, Context.MODE_PRIVATE);
 
-
-
+        buttonRefresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isPause){
+                    isPause=false;
+                    buttonRefresh.setImageResource(getResources().getIdentifier("ic_baseline_pause_24","drawable",getContext().getPackageName()));
+                }else{
+                    isPause=true;
+                    buttonRefresh.setImageResource(getResources().getIdentifier("ic_baseline_play_arrow_24","drawable",getContext().getPackageName()));
+                }
+            }
+        });
 
         rosDate.observe(getViewLifecycleOwner(),rosData -> {
 
@@ -152,11 +167,12 @@ public class LogFragment extends Fragment {
                 subList.add(sdf.format(System.currentTimeMillis())+"  --  topicName:"+rosData.getTopic().name+"  type:"+rosData.getTopic().type+"  msg:"+msg+"\n");
             }else */if(isChecked[index]){
                 subList.add(sdf.format(System.currentTimeMillis())+"  --  topicName:"+rosData.getTopic().name+"  type:"+rosData.getTopic().type+"  msg:"+getMsg(rosData.getMessage().toRawMessage())+"\n");
+                updateLog();
             }
             /*SharedPreferences.Editor edit = sharedPreferences.edit();
             edit.putStringSet(SUB_CONTENT,ListToSet(subs));
             edit.commit();*/
-            updateLog();
+
         } );
 
         buttonEdit.setOnClickListener(v->{
@@ -202,7 +218,7 @@ public class LogFragment extends Fragment {
        /* SharedPreferences sharedPreferences = getContext().getSharedPreferences(LOG_KEY, Context.MODE_PRIVATE);
         Set<String> subSet = sharedPreferences.getStringSet(SUB_CONTENT, new HashSet<>());
         Set<String> pubSet = sharedPreferences.getStringSet(PUB_CONTENT,new HashSet<>());*/
-        StringBuilder sb=new StringBuilder("");
+        /*StringBuilder sb=new StringBuilder("");
         for (String s : subList) {
             sb.append(s);
         }
@@ -211,7 +227,18 @@ public class LogFragment extends Fragment {
             sub.setText("");
         }else{
             sub.setText(s1);
+        }*/
+        if(subList.size()<=0){
+            return;
         }
+        sub.append(subList.get(subList.size()-1));
+        if(!isPause){
+            int offset=sub.getLineCount()*sub.getLineHeight();
+            if(offset>sub.getHeight()){
+                sub.scrollTo(0,offset-sub.getHeight());
+            }
+        }
+
     }
     public void showMutilAlertDialog(View v){
         AlertDialog.Builder alertBuilder=new AlertDialog.Builder(getContext());

@@ -116,8 +116,8 @@ public class MiCompass extends View {
     private float val=0f;
     private float valCompare;
     private float destVal=0f;
-    private float pitch;
-    private float roll;
+    private float pitch=0;
+    private float roll=-0;
     //偏转角度红线笔
     private Paint mAnglePaint;
 
@@ -134,15 +134,40 @@ public class MiCompass extends View {
     }
 
     public void setDestVal(float val){
-        this.destVal=val;
+        if(val>180){
+            this.destVal=val-360;
+        }else if(val<-180){
+            this.destVal=val+360;
+        }else{
+            this.destVal=val;
+        }
         invalidate();
     }
 
     public void onNewData(Message message){
         geometry_msgs.Vector3 vector3=(geometry_msgs.Vector3)message;
-        roll=(float) vector3.getX();
-        pitch=(float) vector3.getY();
-        val=(float) vector3.getZ();
+        if(vector3.getX()>180){
+            roll=(float) vector3.getX()-360;
+        }else if(vector3.getX()<-180){
+            roll=(float) vector3.getX()+360;
+        }else{
+            roll=(float) vector3.getX();
+        }
+        if(vector3.getY()>180){
+            pitch=(float) vector3.getY()-360;
+        }else if(vector3.getY()<-180){
+            pitch=(float) vector3.getY()+360;
+        }else{
+            pitch=(float) vector3.getY();
+        }
+        if(vector3.getZ()>180){
+            val=(float) vector3.getZ()-360;
+        }else if(vector3.getZ()<-180){
+            val=(float) vector3.getZ()+360;
+        }else{
+            val=(float) vector3.getZ();
+        }
+
         this.invalidate();
     }
 
@@ -333,13 +358,36 @@ public class MiCompass extends View {
         int centerTextWidth = mCenterTextRect.width();
         int centerTextHeight = mCenterTextRect.height();
         mCanvas.drawText(centerText,mCenterX-centerTextWidth/2,mTextHeight+mOutSideRadius+centerTextHeight/5,mCenterPaint);
-*/      mCanvas.rotate(-val,mCenterX,mOutSideRadius+mTextHeight);
+*/      mCanvas.rotate(-val+90,mCenterX,mOutSideRadius+mTextHeight);
         float radius=mCircumRadius-40;
-        float centerX=(roll/180)*(mCircumRadius-40)+mCenterX;
-        float centerY=(pitch/180)*(mCircumRadius-40)+mOutSideRadius+mTextHeight;
+        float roll=this.roll;
+        float pitch=this.pitch;
+        if(roll*roll+pitch*pitch>=45*45){
+            float roll_pitch=roll/pitch;
+            pitch=(float) Math.sqrt((45*45)/(roll_pitch*roll_pitch+1));
+            if(this.pitch<0){
+                pitch=-pitch;
+            }
+            roll=roll_pitch*pitch;
+        }else {
+            if(roll>45){
+                roll=45;
+            }
+            if(roll<-45){
+                roll=-45;
+            }
+            if(pitch>45){
+                pitch=45;
+            }
+            if(pitch<-45){
+                pitch=-45;
+            }
+        }
+        float centerX=(pitch/45)*(mCircumRadius-40)+mCenterX;
+        float centerY=mOutSideRadius+mTextHeight+(roll/45)*(mCircumRadius-40);
         mCanvas.drawLine(mCenterX,mOutSideRadius+mTextHeight-(mCircumRadius-40),mCenterX,mOutSideRadius+mTextHeight+(mCircumRadius-40),mCircumPaint);
         mCanvas.drawLine(mCenterX-(mCircumRadius-40),mOutSideRadius+mTextHeight,mCenterX+(mCircumRadius-40),mOutSideRadius+mTextHeight,mCircumPaint);
-        mCanvas.drawCircle(centerX,centerY,radius/40,destPaint);
+        mCanvas.drawCircle(centerX,centerY,radius/20,destPaint);
 
 
 
@@ -416,7 +464,7 @@ public class MiCompass extends View {
         //外接圆小三角形的高度
         int mTriangleHeight=(mOutSideRadius-mCircumRadius)/2;
 
-        mCanvas.rotate(-val,mCenterX,mOutSideRadius+mTextHeight);
+        mCanvas.rotate(-val+90,mCenterX,mOutSideRadius+mTextHeight);
         mCircumTriangle.moveTo(mCenterX,mTriangleHeight+mTextHeight);
         //内接三角形的边长,简单数学运算
         float mTriangleSide = (float) ((mTriangleHeight/(Math.sqrt(3)))*2);
@@ -447,7 +495,7 @@ public class MiCompass extends View {
      */
     private void drawCompassOutSide() {
         mCanvas.save();
-        mCanvas.rotate(-destVal,mCenterX,mOutSideRadius+mTextHeight);
+        mCanvas.rotate(-destVal+90,mCenterX,mOutSideRadius+mTextHeight);
         //小三角形的高度
         int mTriangleHeight=40;
         //定义Path画小三角形
