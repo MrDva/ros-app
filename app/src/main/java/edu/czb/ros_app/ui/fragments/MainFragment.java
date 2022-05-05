@@ -1,6 +1,10 @@
 package edu.czb.ros_app.ui.fragments;
 
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -59,6 +63,7 @@ public class MainFragment extends Fragment {
         navController= Navigation.findNavController(requireActivity(),R.id.fragment_container);
         bottomNav=view.findViewById(R.id.bottom_nav);
         NavigationUI.setupWithNavController(bottomNav,navController);
+        checkPermission();
         //getActivity().onMenuItemSelected()
         navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
             @Override
@@ -84,5 +89,21 @@ public class MainFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View inflate = inflater.inflate(R.layout.fragment_main, container, false);
         return inflate;
+    }
+
+    private static final int REQUEST_CODE = 1;
+
+    private void checkPermission() {
+        try {
+            String[] PERMISSIONS_STORAGE = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            int permission = ActivityCompat.checkSelfPermission(getContext(), "android.permission.WRITE_EXTERNAL_STORAGE");
+            if (permission != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(getActivity(), PERMISSIONS_STORAGE, REQUEST_CODE);
+            } else {
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

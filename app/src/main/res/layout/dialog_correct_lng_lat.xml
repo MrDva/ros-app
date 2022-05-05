@@ -54,8 +54,33 @@
             android:textSize="18sp"/>
     </LinearLayout>
 
-
-
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="显示先前路径点"
+            android:id="@+id/is_show_path"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="路径点间的距离至少为(六位小数):"/>
+        <EditText
+            android:id="@+id/edit_distance"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:layout_marginTop="5dp"
+            android:text="0.000000"
+            android:minHeight="45dp"
+            android:textSize="18sp"/>
+    </LinearLayout>
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -75,6 +100,8 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"/>
+
+
 
         <Button
             android:id="@+id/btn_cancel"

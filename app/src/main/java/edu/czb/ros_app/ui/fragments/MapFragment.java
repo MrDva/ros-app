@@ -38,6 +38,7 @@ import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BaiduMapOptions;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
+import com.baidu.mapapi.map.DotOptions;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
@@ -51,6 +52,9 @@ import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.model.LatLngBounds;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.common.base.Strings;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -58,9 +62,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import edu.czb.ros_app.R;
+import edu.czb.ros_app.model.db.DataStorage;
+import edu.czb.ros_app.model.entities.info.BatteryStateEntity;
+import edu.czb.ros_app.model.entities.info.LatLngEntity;
 import edu.czb.ros_app.model.rosRepositories.message.Topic;
 import edu.czb.ros_app.model.rosRepositories.message.TopicName;
 import edu.czb.ros_app.ui.dialog.CorrectLatLngDialog;
+import edu.czb.ros_app.utils.FileUtil;
 import edu.czb.ros_app.utils.ResourceUtil;
 import edu.czb.ros_app.viewmodel.MapViewModel;
 import edu.czb.ros_app.widgets.map.MapPathData;
@@ -74,6 +82,7 @@ public class MapFragment extends Fragment {
     public final static String INFO="info";
     public final static String LAT_CORR_FACTOR="lat_corr_factor_key";
     public final static String LNG_CORR_FACTOR="lng_corr_factor_key";
+    public final static String DISTANCE_FACTOR="distance_factor_key";
     public final static String CURR_LAT="curr_lat";
     public final static String CURR_LNG="curr_lng";
     private final static String TAG=MapFragment.class.getSimpleName();
@@ -86,12 +95,16 @@ public class MapFragment extends Fragment {
     private FloatingActionButton button_send;
     private FloatingActionButton button_clean;
     private FloatingActionButton button_correct;
+    private FloatingActionButton button_save;
     private BDLocation rosCurrentLocation;
     private List<LatLng> latLngList=new ArrayList<>();
     private List<LatLng> myLatLngList=new ArrayList<>();
     private List<BDLocation> destLocations= new ArrayList<>();
     private List<OverlayOptions> destOptions=new ArrayList<>();
     private List<Integer> sortDestLocations=new ArrayList<>();
+    private static final String DEST_LOCATION="dest_location";
+    private static final String DEST_OPTIONS="dest_options";
+
     private Integer index=-1;
     private BDLocation boatLocation=null;
     private MutableLiveData<MapPathData> mapPathData=new MutableLiveData<>();
@@ -104,7 +117,10 @@ public class MapFragment extends Fragment {
     private TextView myMarkerLat;
     private TextView myMarkerLng;
 
+
     private CorrectLatLngDialog correctLatLngDialog;
+
+    private DataStorage dataStorage;
 
 
 
@@ -135,6 +151,9 @@ public class MapFragment extends Fragment {
         button_clean=getView().findViewById(R.id.button_clean);
         button_send=getView().findViewById(R.id.button_send);
         button_correct=getView().findViewById(R.id.button_correct);
+        button_save=getView().findViewById(R.id.button_save);
+
+        dataStorage=DataStorage.getInstance(getContext());
 
         View view=LayoutInflater.from(getContext()).inflate(R.layout.marker,null);
         destMarker=view.findViewById(R.id.destLocation);
@@ -149,6 +168,7 @@ public class MapFragment extends Fragment {
         button_send.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#88ffeecc")));
         button_clean.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#98ccFF22")));
         button_correct.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0000ffff")));
+        button_save.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#00ff00ff")));
         baiduMap=mapView.getMap();
         baiduMap.setMyLocationEnabled(true);
 
@@ -175,20 +195,24 @@ public class MapFragment extends Fragment {
 //开启地图定位图层
         mLocationClient.start();
 
+        SharedPreferences info= getActivity().getSharedPreferences(INFO,Context.MODE_PRIVATE);
+        String destString = info.getString(DEST_LOCATION, "");
+        if(!"".equals(destString)){
+            GsonBuilder gsonBuilder=new GsonBuilder();
+            gsonBuilder.setPrettyPrinting();
+            Gson gson=gsonBuilder.create();
+            List<BDLocation> list = gson.fromJson(destString, new TypeToken<List<BDLocation>>() {}.getType());
+            for (BDLocation location : list) {
+                addDestLocation(location);
+            }
+        }
+
         viewModel.getRosDate().observe(getViewLifecycleOwner(),rosData -> {
             SharedPreferences sharedPreferences = getContext().getSharedPreferences(TopicName.TOPIC_KEY, Context.MODE_PRIVATE);
             if(rosData.getTopic().name.equals(sharedPreferences.getString(TopicName.MAP,TopicName.MAP))){
                // updateLatLngInfo();
                 updateRosLocation((NavSatFix) rosData.getMessage());
-            }/*else if(rosData.getTopic().name.toLowerCase().contains("imu")){
-                binding.imu.setText(rosData.getMessage().toString());
-            }else if(rosData.getTopic().name.toLowerCase().contains("navSatFix")){
-                binding.navSatFix.setText(rosData.getMessage().toString());
-            }else if(rosData.getTopic().name.toLowerCase().contains("temperature")){
-                binding.temperature.setText(rosData.getMessage().toString());
-            }else if(rosData.getTopic().type.contains("Float32")){
-                binding.other.setText(rosData.getTopic().name+":"+((Float32)rosData.getMessage()).getData());
-            }*/
+            }
         });
 
         myLocation.setOnClickListener(v -> {
@@ -220,10 +244,24 @@ public class MapFragment extends Fragment {
         button_correct.setOnClickListener(v->{
             showEditDialog(v);
         });
-       /* baiduMap.setOnMapTouchListener(v->{
-            LatLng latLng = baiduMap.getProjection().fromScreenLocation(new Point((int) v.getX(), (int) v.getY()));
-            Log.i(TAG,"latLng:"+latLng.latitude+" "+latLng.longitude);
-        });*/
+        button_save.setOnClickListener(v->{
+            List<LatLngEntity> allBattery = dataStorage.getAllLatLng();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    //dismissLoad();
+                    try {
+                        FileUtil.writeLatLngExcel(allBattery);
+                        Toast.makeText(getContext(), "导出成功:/storage/emulated/0/Download/", Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(getContext(), "导出失败", Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+            });
+        });
+
         baiduMap.setOnMapLongClickListener(v->{
             double longitude = v.longitude;
             double latitude = v.latitude;
@@ -240,22 +278,7 @@ public class MapFragment extends Fragment {
                     BDLocation destLocation=new BDLocation();
                     destLocation.setLatitude(latitude);
                     destLocation.setLongitude(longitude);
-                    int index=sortDestLocations.size();
-                    destMarker.setText(new StringBuilder().append(index));
-                    sortDestLocations.add(index);
-                    //Bitmap n = ResourceUtil.getBitmapFromVectorDrawable(BMapManager.getContext(),R.drawable.ic_baseline_room_24);
-                    Bitmap n=getViewBitmap(destMarker);
-                    BitmapDescriptor bitmap= BitmapDescriptorFactory.fromBitmap(n);
-                    MarkerOptions destOption = new MarkerOptions()
-                            .position(new LatLng(latitude, longitude))
-                            .icon(bitmap);
-                    destLocations.add(destLocation);
-                    destOptions.add(destOption);
-                    Marker marker = (Marker)baiduMap.addOverlay(destOption);
-                    marker.setTitle(index+"");
-                    Bundle bundle=new Bundle();
-                    bundle.putSerializable("id",index);
-                    marker.setExtraInfo(bundle);
+                    addDestLocation(destLocation);
                 }
             });
             builder1.setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -310,8 +333,35 @@ public class MapFragment extends Fragment {
 
     }
 
+    private void addDestLocation(BDLocation destLocation){
+        int index=sortDestLocations.size();
+        destMarker.setText(new StringBuilder().append(index));
+        sortDestLocations.add(index);
+        //Bitmap n = ResourceUtil.getBitmapFromVectorDrawable(BMapManager.getContext(),R.drawable.ic_baseline_room_24);
+        Bitmap n=getViewBitmap(destMarker);
+        BitmapDescriptor bitmap= BitmapDescriptorFactory.fromBitmap(n);
+        MarkerOptions destOption = new MarkerOptions()
+                .position(new LatLng(destLocation.getLatitude(), destLocation.getLongitude()))
+                .icon(bitmap);
+        destLocations.add(destLocation);
+        destOptions.add(destOption);
+        Marker marker = (Marker)baiduMap.addOverlay(destOption);
+        marker.setTitle(index+"");
+        Bundle bundle=new Bundle();
+        bundle.putSerializable("id",index);
+        marker.setExtraInfo(bundle);
+    }
+
     @Override
     public void onDestroyView(){
+        GsonBuilder builder=new GsonBuilder();
+        builder.setPrettyPrinting();
+        Gson gson=builder.create();
+        SharedPreferences info= getActivity().getSharedPreferences(INFO,Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor=info.edit();
+        editor.putString(DEST_LOCATION,gson.toJson(destLocations,new TypeToken<List<BDLocation>>(){}.getType()));
+        //editor.putString(DEST_LOCATION,gson.toJson(destOptions));
+        editor.commit();
         mLocationClient.stop();
         baiduMap.setMyLocationEnabled(false);
         mapView.onDestroy();
@@ -419,6 +469,7 @@ public class MapFragment extends Fragment {
         if(latLngList.size()>=2){
             LatLng latLng = latLngList.remove(0);
             removeOverLays(latLng);
+            updateDotOverlay(latLng);
         }
         boatMarkerLat.setText("lat:["+String.format("%.6f",navSatFix.getLatitude())+"]");
         boatMarkerLng.setText("lng:["+String.format("%.6f",navSatFix.getLongitude())+"]");
@@ -504,10 +555,7 @@ public class MapFragment extends Fragment {
         return getViewBitmap(addViewContent,addViewContent2,R.layout.marker_boat);
     }
     private Bitmap getViewBitmap(View addViewContent,int layoutId,int imageId) {
-        addViewContent.setDrawingCacheEnabled(true);
-        addViewContent.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-        addViewContent.layout(0, 0, addViewContent.getMeasuredWidth(), addViewContent.getMeasuredHeight());
-        addViewContent.buildDrawingCache();
+
         View view=LayoutInflater.from(getContext()).inflate(layoutId,null);
         view.setDrawingCacheEnabled(true);
         view.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
@@ -520,7 +568,13 @@ public class MapFragment extends Fragment {
         Paint paint=new Paint();
         paint.setColor(Color.RED);
         paint.setTextSize(Math.min(bitmap.getHeight()/2,bitmap.getWidth()/2));
-        canvas.drawText(((TextView)addViewContent).getText().toString(),0,imageView.getHeight(),paint);
+        if(addViewContent!=null){
+            addViewContent.setDrawingCacheEnabled(true);
+            addViewContent.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+            addViewContent.layout(0, 0, addViewContent.getMeasuredWidth(), addViewContent.getMeasuredHeight());
+            addViewContent.buildDrawingCache();
+            canvas.drawText(((TextView)addViewContent).getText().toString(),0,imageView.getHeight(),paint);
+        }
         return bitmap;
     }
     private Bitmap getViewBitmap(View addViewContent,View addViewContent2,int layoutId) {
@@ -570,6 +624,21 @@ public class MapFragment extends Fragment {
                         latitude_correction_factor = currentLocation.getLatitude() - Double.parseDouble(Strings.isNullOrEmpty(correctLatLngDialog.text_lat.getText().toString())?(currentLocation.getLatitude()+""):correctLatLngDialog.text_lat.getText().toString());
                         longitude_correction_factor = currentLocation.getLongitude() - Double.parseDouble(Strings.isNullOrEmpty(correctLatLngDialog.text_lng.getText().toString())?(currentLocation.getLongitude()+""):correctLatLngDialog.text_lng.getText().toString());
                         saveLatLngCorrect(latitude_correction_factor, longitude_correction_factor);
+                        saveDistanceFactor(Double.parseDouble(Strings.isNullOrEmpty(correctLatLngDialog.text_distance.getText().toString())?("0"):correctLatLngDialog.text_distance.getText().toString()));
+                        SharedPreferences info= getActivity().getSharedPreferences(INFO,Context.MODE_PRIVATE);
+                        SharedPreferences.Editor edit = info.edit();
+                        if(correctLatLngDialog.checkBox.isChecked()){
+                            showDotPath();
+                            edit.putBoolean(IS_CHECK,true);
+                            edit.commit();
+                        }else{
+                            //removeOverLayList(dotLatLngPath);
+                            for (LatLng latLng : dotLatLngPath) {
+                                removeOverLays(latLng);
+                            }
+                            edit.putBoolean(IS_CHECK,false);
+                            edit.commit();
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -591,6 +660,14 @@ public class MapFragment extends Fragment {
         Log.i(TAG,"经纬度偏差值保存成功");
     }
 
+    private void saveDistanceFactor(double distance){
+        SharedPreferences info= getActivity().getSharedPreferences(INFO,Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor=info.edit();
+        editor.putString(DISTANCE_FACTOR,distance+"");
+        editor.commit();
+        Log.i(TAG,"路径点距离保存成功");
+    }
+
     private void saveCurrLatLng(double lat,double lng){
         SharedPreferences info= getActivity().getSharedPreferences(INFO,Context.MODE_PRIVATE);
         SharedPreferences.Editor editor=info.edit();
@@ -606,6 +683,43 @@ public class MapFragment extends Fragment {
         latitude_correction_factor=Double.parseDouble(info.getString(LAT_CORR_FACTOR,"0"));
         Log.i(TAG,"经纬度偏差值:["+latitude_correction_factor+" ,"+longitude_correction_factor+"]");
     }
+    private List<LatLng> dotLatLngPath=new ArrayList<>();
+    public final static String IS_CHECK="isCheck";
+    private boolean is_check=false;
+    private void updateDotOverlay(LatLng latLng){
+        if(dotLatLngPath.size()>0){
+            LatLng lastPoint=dotLatLngPath.get(dotLatLngPath.size()-1);
+            SharedPreferences sharedPreferences = getContext().getSharedPreferences(MapFragment.INFO, Context.MODE_PRIVATE);
+            double distance=Double.parseDouble(sharedPreferences.getString(DISTANCE_FACTOR,"0"));
+            if((Math.sqrt((lastPoint.longitude-latLng.longitude)*(lastPoint.longitude-latLng.longitude)+(lastPoint.latitude-latLng.latitude)*(lastPoint.latitude-latLng.latitude)))<distance){
+                return;
+            }
+        }
+        dotLatLngPath.add(latLng);
+        SharedPreferences info= getActivity().getSharedPreferences(INFO,Context.MODE_PRIVATE);
+        if(!info.getBoolean(IS_CHECK,false)){
+            return;
+        }
+        Bitmap n=getViewBitmap(null,R.layout.marker_dot,R.id.dot_path);
+        BitmapDescriptor bitmap= BitmapDescriptorFactory.fromBitmap(n);
+        MarkerOptions destOption = new MarkerOptions()
+                .position(latLng)
+                .icon(bitmap);
+        baiduMap.addOverlay(destOption);
+
+    }
+    
+    private void showDotPath(){
+        for (LatLng latLng : dotLatLngPath) {
+            Bitmap n=getViewBitmap(null,R.layout.marker_dot,R.id.dot_path);
+            BitmapDescriptor bitmap= BitmapDescriptorFactory.fromBitmap(n);
+            MarkerOptions destOption = new MarkerOptions()
+                    .position(latLng)
+                    .icon(bitmap);
+            baiduMap.addOverlay(destOption);
+        }
+    }
+
 
 
 }

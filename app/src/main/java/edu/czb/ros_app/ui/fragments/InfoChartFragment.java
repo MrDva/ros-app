@@ -96,7 +96,7 @@ public class InfoChartFragment extends Fragment {
         batteryChart=(LineChart) getView().findViewById(R.id.chart_battery);
         rpyChart=(LineChart)getView().findViewById(R.id.chart_rpy);
         tempChart=(LineChart)getView().findViewById(R.id.chart_temp);
-
+        checkPermission();
         bntBackToInfo=(FloatingActionButton)getView().findViewById(R.id.switch_info);
         bntBackToInfo.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#8881D4FA")));
 
@@ -131,7 +131,7 @@ public class InfoChartFragment extends Fragment {
         tempDescription.setText("温度");
         tempChart.setDescription(tempDescription);
 
-        checkPermission();
+        //checkPermission();
         batteryDialog=new AlertDialog.Builder(getContext())
                 .setTitle("请选择要对电池相关数据进行的操作")
                 /*.setNeutralButton("刷新",new DialogInterface.OnClickListener(){

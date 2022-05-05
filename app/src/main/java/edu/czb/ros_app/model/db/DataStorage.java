@@ -12,6 +12,7 @@ import java.util.List;
 
 import edu.czb.ros_app.model.entities.MasterEntity;
 import edu.czb.ros_app.model.entities.info.BatteryStateEntity;
+import edu.czb.ros_app.model.entities.info.LatLngEntity;
 import edu.czb.ros_app.model.entities.info.RpyDataEntity;
 import edu.czb.ros_app.model.entities.info.TempDataEntity;
 import edu.czb.ros_app.utils.Constants;
@@ -27,7 +28,7 @@ import edu.czb.ros_app.utils.LambdaTask;
  * @Version: 1.0
  */
 @Database(entities =
-        { MasterEntity.class,BatteryStateEntity.class,RpyDataEntity.class,TempDataEntity.class},
+        { MasterEntity.class,BatteryStateEntity.class,RpyDataEntity.class,TempDataEntity.class, LatLngEntity.class},
         version = 6, exportSchema = false)
 public abstract class DataStorage extends RoomDatabase {
     private static DataStorage instance;
@@ -132,6 +133,30 @@ public abstract class DataStorage extends RoomDatabase {
 
     public List<TempDataEntity> getAllTemp(){
         return temperatureDao().getAllData();
+    }
+
+
+    //LatLng methods -----------------------------------------------------------------------------
+    public abstract LatLngDao latLngDao();
+
+    public void addLatLngDataEntity(LatLngEntity latLngEntity){
+        new LambdaTask(()->latLngDao().insert(latLngEntity)).execute();
+    }
+
+    public void updateLatLng(LatLngEntity latLngEntity){
+        new LambdaTask(()->latLngDao().update(latLngEntity)).execute();
+    }
+
+    public void deleteAllLngLat(){
+        new LambdaTask(()->latLngDao().deleteAllData()).execute();
+    }
+
+    public LiveData<List<LatLngEntity>> getLatLngLimitList(long limit){
+        return latLngDao().getLimitListData(limit);
+    }
+
+    public List<LatLngEntity> getAllLatLng(){
+        return latLngDao().getAllData();
     }
 
     // Widget methods ------------------------------------------------------------------------------

@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 
 import edu.czb.ros_app.model.entities.info.BatteryStateEntity;
+import edu.czb.ros_app.model.entities.info.LatLngEntity;
 import edu.czb.ros_app.model.entities.info.RpyDataEntity;
 import edu.czb.ros_app.model.entities.info.TempDataEntity;
 import jxl.Workbook;
@@ -222,8 +223,8 @@ public class FileUtil {
             Label voltage = new Label(1, i + 1, String.format("%.2f",order.voltage));
             Label current = new Label(2,i+1,String.format("%.2f",order.current));
             Label charge = new Label(3, i + 1, String.format("%.2f",order.charge));
-            Label capacity = new Label(3, i + 1, String.format("%.2f",order.capacity));
-            Label time=new Label(4,i+1,sdf.format(order.createdTime));
+            Label capacity = new Label(4, i + 1, String.format("%.2f",order.capacity));
+            Label time=new Label(5,i+1,sdf.format(order.createdTime));
 
             sheet.addCell(id);
             sheet.addCell(voltage);
@@ -272,10 +273,58 @@ public class FileUtil {
 
             Label id = new Label(0, i + 1, order.id+"");
             Label temp = new Label(1, i + 1, String.format("%.2f",order.temp));
-            Label time=new Label(4,i+1,sdf.format(order.createdTime));
+            Label time=new Label(2,i+1,sdf.format(order.createdTime));
 
             sheet.addCell(id);
             sheet.addCell(temp);
+            sheet.addCell(time);
+
+        }
+        // 写入数据
+        wwb.write();
+        // 关闭文件
+        wwb.close();
+    }
+
+    public static void writeLatLngExcel(List<LatLngEntity> exportOrder) throws Exception{
+        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)&&getAvailableStorage()>1000000) {
+            Log.i("FileUtil:","SD存储空间不足");
+            return ;
+        }
+        String[] title = { "序号","纬度","经度","时间" };
+        File file;
+        String mSDCardFolderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/rosData";
+        File dir = new File(mSDCardFolderPath);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        // 创建Excel工作表
+        file = new File(dir, convertTime(System.currentTimeMillis(), "MM_dd_HH_mm") + "_LatLng.xls");
+        OutputStream os = new FileOutputStream(file);
+        WritableWorkbook wwb;
+        wwb = Workbook.createWorkbook(os);
+        // 添加第一个工作表并设置第一个Sheet的名字
+        WritableSheet sheet = wwb.createSheet("LatLng", 0);
+        Label label;
+        for (int i = 0; i < title.length; i++) {
+            // Label(x,y,z) 代表单元格的第x+1列，第y+1行, 内容z
+            // 在Label对象的子对象中指明单元格的位置和内容
+            label = new Label(i, 0, title[i], getHeader());
+            // 将定义好的单元格添加到工作表中
+            sheet.addCell(label);
+        }
+
+        for (int i = 0; i < exportOrder.size(); i++) {
+            LatLngEntity order = exportOrder.get(i);
+
+            Label id = new Label(0, i + 1, order.id+"");
+            Label lat = new Label(1, i + 1, String.format("%.6f",order.lat));
+            Label lng = new Label(2,i+1,String.format("%.6f",order.lng));
+            Label time=new Label(3,i+1,sdf.format(order.createdTime));
+
+            sheet.addCell(id);
+            sheet.addCell(lat);
+            sheet.addCell(lng);
             sheet.addCell(time);
 
         }

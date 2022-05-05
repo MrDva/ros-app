@@ -33,6 +33,7 @@ import java.util.List;
 import edu.czb.ros_app.model.db.DataStorage;
 import edu.czb.ros_app.model.entities.MasterEntity;
 import edu.czb.ros_app.model.entities.info.BatteryStateEntity;
+import edu.czb.ros_app.model.entities.info.LatLngEntity;
 import edu.czb.ros_app.model.entities.info.RpyDataEntity;
 import edu.czb.ros_app.model.entities.info.TempDataEntity;
 import edu.czb.ros_app.model.entities.widgets.BaseEntity;
@@ -60,6 +61,7 @@ import edu.czb.ros_app.widgets.map.MapPathEntity;
 import edu.czb.ros_app.widgets.temperature.TemperatureEntity;
 import geometry_msgs.TransformStamped;
 import sensor_msgs.BatteryState;
+import sensor_msgs.NavSatFix;
 import sensor_msgs.Temperature;
 import tf2_msgs.TFMessage;
 
@@ -73,7 +75,7 @@ import tf2_msgs.TFMessage;
  * @Version: 1.0
  */
 public class RosRepository implements MessageListener<RosData> {
-    private static final String TAG=RosRepository.class.getSimpleName();
+    private static final String TAG = RosRepository.class.getSimpleName();
     private Context context;
     private MasterEntity masterEntity;
     private final WeakReference<Context> contextReference;
@@ -82,39 +84,40 @@ public class RosRepository implements MessageListener<RosData> {
     private final MutableLiveData<RosData> receivedData;
     private final MutableLiveData<RosData> receivedMapData;
     private final HashMap<Topic, AbstractNode> currentNodes;
-    private final HashMap<Topic,AbstractNode> currentPublishNodes;
-    private final HashMap<Topic,AbstractNode> additionNodes;
+    private final HashMap<Topic, AbstractNode> currentPublishNodes;
+    private final HashMap<Topic, AbstractNode> additionNodes;
     private NodeConfiguration nodeConfiguration;
     public final DataStorage dataStorage;
+
     //private FrameTransformTree frameTransformTree;
-    public RosRepository(Context context){
-        this.contextReference=new WeakReference<>(context);
+    public RosRepository(Context context) {
+        this.contextReference = new WeakReference<>(context);
         this.currentNodes = new HashMap<>();
-        this.additionNodes=new HashMap<>();
-        this.currentPublishNodes=new HashMap<>();
+        this.additionNodes = new HashMap<>();
+        this.currentPublishNodes = new HashMap<>();
         this.rosConnected = new MutableLiveData<>(ConnectionStateType.DISCONNECTED);
         this.receivedData = new MutableLiveData<>();
-        this.receivedMapData=new MutableLiveData<>();
-        this.context=context;
-        this.dataStorage=DataStorage.getInstance(context);
-       // this.frameTransformTree = TransformProvider.getInstance().getTree();
+        this.receivedMapData = new MutableLiveData<>();
+        this.context = context;
+        this.dataStorage = DataStorage.getInstance(context);
+        // this.frameTransformTree = TransformProvider.getInstance().getTree();
         this.initStaticNodes();
     }
 
-    public void additionNode(Topic topic){
-        SubscriberNode node=new SubscriberNode(this);
+    public void additionNode(Topic topic) {
+        SubscriberNode node = new SubscriberNode(this);
         node.setTopic(topic);
-        additionNodes.put(topic,node);
+        additionNodes.put(topic, node);
     }
 
-    public void registerAllAdditionNodes(){
-        for (AbstractNode node: additionNodes.values()) {
+    public void registerAllAdditionNodes() {
+        for (AbstractNode node : additionNodes.values()) {
             this.registerNode(node);
         }
     }
 
-    public void unregisterAllAdditionNodes(){
-        for(AbstractNode node:additionNodes.values()){
+    public void unregisterAllAdditionNodes() {
+        for (AbstractNode node : additionNodes.values()) {
             this.unregisterNode(node);
         }
         additionNodes.clear();
@@ -126,56 +129,64 @@ public class RosRepository implements MessageListener<RosData> {
         if (message.getMessage() instanceof TFMessage) {
             TFMessage tf = (TFMessage) message.getMessage();
 
-            for (TransformStamped transform: tf.getTransforms()) {
+            for (TransformStamped transform : tf.getTransforms()) {
                 //frameTransformTree.update(transform);
-                Log.i(TAG,transform.toString());
+                Log.i(TAG, transform.toString());
             }
         }
-        if(message.getTopic().name.equals(getTopicName(TopicName.MAP))){
+        if (message.getTopic().name.equals(getTopicName(TopicName.MAP))) {
             this.receivedMapData.postValue(message);
         }
         this.receivedData.postValue(message);
-        String type=message.getTopic().type;
-        if(message.getTopic().name.equals(getTopicName(TopicName.BATTERY))){
-            BatteryState batteryState=(BatteryState)(message.getMessage());
-            BatteryStateEntity batteryStateEntity=new BatteryStateEntity();
-            batteryStateEntity.createdTime=System.currentTimeMillis();
-            batteryStateEntity.current=batteryState.getCurrent();
-            batteryStateEntity.capacity=batteryState.getCapacity();
-            batteryStateEntity.voltage=batteryState.getVoltage();
-            batteryStateEntity.charge=batteryState.getCharge();
-            TempDataEntity tempDataEntity=new TempDataEntity();
-            tempDataEntity.createdTime= batteryStateEntity.createdTime;
-            tempDataEntity.temp=batteryState.getPercentage();
+        String type = message.getTopic().type;
+        if (message.getTopic().name.equals(getTopicName(TopicName.BATTERY))) {
+            BatteryState batteryState = (BatteryState) (message.getMessage());
+            BatteryStateEntity batteryStateEntity = new BatteryStateEntity();
+            batteryStateEntity.createdTime = System.currentTimeMillis();
+            batteryStateEntity.current = batteryState.getCurrent();
+            batteryStateEntity.capacity = batteryState.getCapacity();
+            batteryStateEntity.voltage = batteryState.getVoltage();
+            batteryStateEntity.charge = batteryState.getCharge();
+            TempDataEntity tempDataEntity = new TempDataEntity();
+            tempDataEntity.createdTime = batteryStateEntity.createdTime;
+            tempDataEntity.temp = batteryState.getPercentage();
             dataStorage.addBattery(batteryStateEntity);
             dataStorage.addTempDataEntity(tempDataEntity);
-        }else if(message.getTopic().name.equals((getTopicName(TopicName.RPY)))){
-            geometry_msgs.Vector3 vector3=(geometry_msgs.Vector3)(message.getMessage());
-            RpyDataEntity entity=new RpyDataEntity();
-            entity.createdTime=System.currentTimeMillis();
-            entity.roll=vector3.getX();
-            entity.yaw=vector3.getZ();
-            entity.pitch=vector3.getY();
+        } else if (message.getTopic().name.equals((getTopicName(TopicName.RPY)))) {
+            geometry_msgs.Vector3 vector3 = (geometry_msgs.Vector3) (message.getMessage());
+            RpyDataEntity entity = new RpyDataEntity();
+            entity.createdTime = System.currentTimeMillis();
+            entity.roll = vector3.getX();
+            entity.yaw = vector3.getZ();
+            entity.pitch = vector3.getY();
             dataStorage.addRpy(entity);
+        } else if (message.getTopic().name.equals(getTopicName(TopicName.MAP))) {
+            NavSatFix navSatFix = (NavSatFix) message.getMessage();
+            LatLngEntity latLngEntity = new LatLngEntity();
+            latLngEntity.lat = navSatFix.getLatitude();
+            latLngEntity.lng = navSatFix.getLongitude();
+            latLngEntity.createdTime = System.currentTimeMillis();
+            dataStorage.addLatLngDataEntity(latLngEntity);
         }
     }
 
     /**
      * Find the associated node and inform it about the changed data.
+     *
      * @param data Widget data that has changed
      */
     public void publishData(BaseData data) {
         AbstractNode node = currentPublishNodes.get(data.getTopic());
         //Log.i(TAG,"topic:"+data.getTopic().name);
-        if(node instanceof PublisherNode) {
-            ((PublisherNode)node).setData(data);
+        if (node instanceof PublisherNode) {
+            ((PublisherNode) node).setData(data);
         }
     }
 
-    public void updateMaster(MasterEntity master){
+    public void updateMaster(MasterEntity master) {
         Log.i(TAG, "Update Master");
 
-        if(master == null) {
+        if (master == null) {
             Log.i(TAG, "Master is null");
             return;
         }
@@ -187,19 +198,21 @@ public class RosRepository implements MessageListener<RosData> {
         return rosConnected;
     }
 
-    public MutableLiveData<RosData> getRosData(){
+    public MutableLiveData<RosData> getRosData() {
         return receivedData;
     }
-    public MutableLiveData<RosData> getReceivedMapData(){
+
+    public MutableLiveData<RosData> getReceivedMapData() {
         return receivedMapData;
     }
 
-    public void connectToMaster(){
+    public void connectToMaster() {
         Log.i(TAG, "Connect to Master");
         ConnectionStateType connectionType = rosConnected.getValue();
         if (connectionType == ConnectionStateType.CONNECTED || connectionType == ConnectionStateType.PENDING) {
             return;
-        };
+        }
+        ;
 
         rosConnected.setValue(ConnectionStateType.PENDING);
 
@@ -221,7 +234,7 @@ public class RosRepository implements MessageListener<RosData> {
     }
 
 
-    public void disconnectFromMaster(){
+    public void disconnectFromMaster() {
         Log.i(TAG, "Disconnect from Master");
         if (nodeMainExecutorService == null) {
             return;
@@ -231,23 +244,23 @@ public class RosRepository implements MessageListener<RosData> {
     }
 
     public void registerAllNodes() {
-        for (AbstractNode node: currentNodes.values()) {
+        for (AbstractNode node : currentNodes.values()) {
             this.registerNode(node);
         }
-        for(AbstractNode node: currentPublishNodes.values()){
+        for (AbstractNode node : currentPublishNodes.values()) {
             this.registerNode(node);
         }
     }
 
-    public void clearAllNodes(){
+    public void clearAllNodes() {
         currentNodes.clear();
     }
 
     public void unregisterAllNodes() {
-        for (AbstractNode node: currentNodes.values()) {
+        for (AbstractNode node : currentNodes.values()) {
             this.unregisterNode(node);
         }
-        for(AbstractNode node: currentPublishNodes.values()){
+        for (AbstractNode node : currentPublishNodes.values()) {
             this.unregisterNode(node);
         }
     }
@@ -290,11 +303,9 @@ public class RosRepository implements MessageListener<RosData> {
         NodeMainExecutorServiceListener serviceListener;
         URI customMasterUri;
 
-
         RosServiceConnection(URI customUri) {
             customMasterUri = customUri;
         }
-
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
@@ -319,33 +330,36 @@ public class RosRepository implements MessageListener<RosData> {
 
     /**
      * Get a list from the ROS Master with all available topics.
+     *
      * @return Topic list
      */
-    public List<Topic> getTopicList(){
-        ArrayList<Topic> topicList=new ArrayList<>();
-        if(nodeMainExecutorService==null){
+    public List<Topic> getTopicList() {
+        ArrayList<Topic> topicList = new ArrayList<>();
+        if (nodeMainExecutorService == null) {
             return topicList;
         }
         try {
-            MasterClient masterClient=new MasterClient(nodeMainExecutorService.getMasterUri());
-            GraphName graphName=GraphName.newAnonymous();
-            Response<List<TopicType>>responseList=masterClient.getTopicTypes(graphName);
-            for(TopicType topicType:responseList.getResult()){
-                String name=topicType.getName();
-                String type=topicType.getMessageType();
-                if(type.contains("gazebo_msgs")){
+            MasterClient masterClient = new MasterClient(nodeMainExecutorService.getMasterUri());
+            GraphName graphName = GraphName.newAnonymous();
+            Response<List<TopicType>> responseList = masterClient.getTopicTypes(graphName);
+            for (TopicType topicType : responseList.getResult()) {
+                String name = topicType.getName();
+                String type = topicType.getMessageType();
+                if (type.contains("gazebo_msgs")) {
                     continue;
                 }
-                topicList.add(new Topic(name,type));
+                topicList.add(new Topic(name, type));
             }
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
         return topicList;
 
     }
+
     /**
      * Connect the node to ROS node graph if a connection to the ROS master is running.
+     *
      * @param node Node to connect
      */
     private void registerNode(AbstractNode node) {
@@ -367,6 +381,7 @@ public class RosRepository implements MessageListener<RosData> {
 
     /**
      * Disconnect the node from ROS node graph if a connection to the ROS master is running.
+     *
      * @param node Node to disconnect
      */
     private void unregisterNode(AbstractNode node) {
@@ -381,29 +396,29 @@ public class RosRepository implements MessageListener<RosData> {
 
         nodeMainExecutorService.shutdownNodeMain(node);
     }
-    
 
-    public void addAllTopic(){
+
+    public void addAllTopic() {
 
         List<Topic> topicList = getTopicList();
-        Log.i(TAG,"addAllTopic:"+topicList.size());
+        Log.i(TAG, "addAllTopic:" + topicList.size());
         AbstractNode node;
         for (Topic topic : topicList) {
             try {
-                if(!topic.type.contains("std_msgs")||topic.name.contains("debug")){
+                if (!topic.type.contains("std_msgs") || topic.name.contains("debug")) {
                     continue;
                 }
-                node =new SubscriberNode(this);
-                currentNodes.put(topic,node);
+                node = new SubscriberNode(this);
+                currentNodes.put(topic, node);
                 node.setTopic(topic);
                 this.registerNode(node);
-                Log.i(TAG,node.getTopic().name+":"+node.getTopic().type);
-            }catch (Exception e){
+                Log.i(TAG, node.getTopic().name + ":" + node.getTopic().type);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
         }
-        Log.i(TAG,"addedTopic:"+currentNodes.size());
+        Log.i(TAG, "addedTopic:" + currentNodes.size());
     }
 
 
@@ -411,7 +426,7 @@ public class RosRepository implements MessageListener<RosData> {
      * Initialize static nodes eg. tf and tf_static.
      */
     public void initStaticNodes() {
-        Log.i(TAG,"initStaticNodes");
+        Log.i(TAG, "initStaticNodes");
         /*Topic tfTopic = new Topic("/tf", TFMessage._TYPE);
         SubscriberNode tfNode = new SubscriberNode(this);
         tfNode.setTopic(tfTopic);
@@ -422,15 +437,15 @@ public class RosRepository implements MessageListener<RosData> {
         tfStaticNode.setTopic(tfStaticTopic);
         currentNodes.put(tfStaticTopic, tfStaticNode);*/
 
-        BatteryEntity batteryEntity=new BatteryEntity(getTopicName(TopicName.BATTERY));
-        SubscriberNode node=new SubscriberNode(this);
+        BatteryEntity batteryEntity = new BatteryEntity(getTopicName(TopicName.BATTERY));
+        SubscriberNode node = new SubscriberNode(this);
         node.setTopic(batteryEntity.getTopic());
-        currentNodes.put(batteryEntity.getTopic(),node);
+        currentNodes.put(batteryEntity.getTopic(), node);
 
-        MapEntity mapEntity=new MapEntity(getTopicName(TopicName.MAP));
-        node=new SubscriberNode(this);
+        MapEntity mapEntity = new MapEntity(getTopicName(TopicName.MAP));
+        node = new SubscriberNode(this);
         node.setTopic(mapEntity.getTopic());
-        currentNodes.put(mapEntity.getTopic(),node);
+        currentNodes.put(mapEntity.getTopic(), node);
 
         /*TemperatureEntity temperatureEntity=new TemperatureEntity(getTopicName(TopicName.TEMPERATURE));
         node=new SubscriberNode(this);
@@ -442,34 +457,34 @@ public class RosRepository implements MessageListener<RosData> {
         node.setTopic(imuEntity.getTopic());
         currentNodes.put(imuEntity.getTopic(),node);*/
 
-        RpyEntity rpyEntity=new RpyEntity(getTopicName(TopicName.RPY));
-        node=new SubscriberNode(this);
+        RpyEntity rpyEntity = new RpyEntity(getTopicName(TopicName.RPY));
+        node = new SubscriberNode(this);
         node.setTopic(rpyEntity.getTopic());
-        currentNodes.put(rpyEntity.getTopic(),node);
+        currentNodes.put(rpyEntity.getTopic(), node);
 
-        DestYawEntity destYawEntity=new DestYawEntity(getTopicName(TopicName.DEST_YAW));
-        node=new SubscriberNode(this);
+        DestYawEntity destYawEntity = new DestYawEntity(getTopicName(TopicName.DEST_YAW));
+        node = new SubscriberNode(this);
         node.setTopic(destYawEntity.getTopic());
-        currentNodes.put(destYawEntity.getTopic(),node);
+        currentNodes.put(destYawEntity.getTopic(), node);
 
-        JoystickEntity  joystickEntity=new JoystickEntity(getTopicName(TopicName.JOY));
-        PublisherNode publisherNode=new PublisherNode();
+        JoystickEntity joystickEntity = new JoystickEntity(getTopicName(TopicName.JOY));
+        PublisherNode publisherNode = new PublisherNode();
         publisherNode.setTopic(joystickEntity.getTopic());
-        currentPublishNodes.put(joystickEntity.getTopic(),publisherNode);
+        currentPublishNodes.put(joystickEntity.getTopic(), publisherNode);
 
-        MapPathEntity mapPathEntity=new MapPathEntity(getTopicName(TopicName.MAP_PATH));
-        publisherNode=new PublisherNode();
+        MapPathEntity mapPathEntity = new MapPathEntity(getTopicName(TopicName.MAP_PATH));
+        publisherNode = new PublisherNode();
         publisherNode.setTopic(mapPathEntity.getTopic());
-        currentPublishNodes.put(mapPathEntity.getTopic(),publisherNode);
+        currentPublishNodes.put(mapPathEntity.getTopic(), publisherNode);
 
     }
 
-    private String getTopicName(String TopicNameKey){
-        SharedPreferences topicInfo=context.getSharedPreferences(TopicName.TOPIC_KEY,Context.MODE_PRIVATE);
-        return topicInfo.getString(TopicNameKey,TopicNameKey);
+    private String getTopicName(String TopicNameKey) {
+        SharedPreferences topicInfo = context.getSharedPreferences(TopicName.TOPIC_KEY, Context.MODE_PRIVATE);
+        return topicInfo.getString(TopicNameKey, TopicNameKey);
     }
 
-    public List<Topic> getCurrentTopic(){
+    public List<Topic> getCurrentTopic() {
         return new ArrayList<>(currentNodes.keySet());
     }
 

@@ -117,7 +117,7 @@ public class MiCompass extends View {
     private float valCompare;
     private float destVal=0f;
     private float pitch=0;
-    private float roll=-0;
+    private float roll=0;
     //偏转角度红线笔
     private Paint mAnglePaint;
 
