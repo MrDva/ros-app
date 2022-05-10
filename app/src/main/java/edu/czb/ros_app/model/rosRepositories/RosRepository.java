@@ -162,6 +162,17 @@ public class RosRepository implements MessageListener<RosData> {
             dataStorage.addRpy(entity);
         } else if (message.getTopic().name.equals(getTopicName(TopicName.MAP))) {
             NavSatFix navSatFix = (NavSatFix) message.getMessage();
+            try{
+                Double.parseDouble(navSatFix.getLongitude()+"");
+                double v = Double.parseDouble(navSatFix.getLatitude() + "");
+                Log.i(TAG,"latitude:"+v);
+                if(Double.isNaN(navSatFix.getLatitude())||Double.isNaN(navSatFix.getLongitude())){
+                    return;
+                }
+            }catch (Exception e){
+                Log.i(TAG,"接收到无法解析的经纬度数据");
+                return;
+            }
             LatLngEntity latLngEntity = new LatLngEntity();
             latLngEntity.lat = navSatFix.getLatitude();
             latLngEntity.lng = navSatFix.getLongitude();

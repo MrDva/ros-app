@@ -450,11 +450,21 @@ public class MapFragment extends Fragment {
     }*/
 
     public void updateRosLocation(NavSatFix navSatFix){
+        try {
+            Double.parseDouble(navSatFix.getLatitude()+"");
+            Double.parseDouble(navSatFix.getLongitude()+"");
+            if(Double.isNaN(navSatFix.getLongitude())||Double.isNaN(navSatFix.getLatitude())){
+                return;
+            }
+        }catch (Exception e){
+            Log.i(TAG,"接收到无法解析的经纬度数据");
+            return;
+        }
         updateLatLngInfo();
         Log.i(TAG,"navSatFix:"+navSatFix.getAltitude()+":"+navSatFix.getLatitude());
         boatLocation=new BDLocation();
         boatLocation.setLongitude(navSatFix.getLongitude()+longitude_correction_factor);
-        boatLocation.setAltitude(navSatFix.getAltitude());
+        //boatLocation.setAltitude(navSatFix.getAltitude());
         boatLocation.setLatitude(navSatFix.getLatitude()+latitude_correction_factor);
         MyLocationData locData = new MyLocationData.Builder()
                 .accuracy(boatLocation.getRadius())

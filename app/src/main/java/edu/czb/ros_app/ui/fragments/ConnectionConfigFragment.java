@@ -17,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
@@ -32,6 +33,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.common.base.Strings;
 
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 import edu.czb.ros_app.R;
 import edu.czb.ros_app.databinding.FragmentConnectionConfigBinding;
@@ -214,6 +216,10 @@ public class ConnectionConfigFragment extends Fragment implements TextView.OnEdi
     }
 
     public void saveTopic(String preTopicName,String topicName){
+        if(Pattern.compile("\\s+").matcher(topicName).find()){
+            Toast.makeText(getContext(),"设置的话题名称不合，检查是否存在空格",Toast.LENGTH_SHORT).show();
+            return;
+        }
         SharedPreferences topicInfo=getContext().getSharedPreferences(TopicName.TOPIC_KEY,Context.MODE_PRIVATE);
         SharedPreferences.Editor editor=topicInfo.edit();
         editor.putString(preTopicName,Strings.isNullOrEmpty(topicName)?topicInfo.getString(preTopicName,preTopicName):topicName);
